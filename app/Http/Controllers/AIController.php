@@ -51,73 +51,94 @@ class AIController extends Controller
     }
 
     /**
-     * Endpoint untuk Penjelasan AI (Menggunakan Groq API / Llama 3)
+     * Endpoint untuk Penjelasan AI (Menggunakan Groq API)
      */
     public function explainText(Request $request)
     {
-        // 1. Validasi input
+        // 1. Validasi input dari frontend (Menerima kata dan kalimat konteks)
         $request->validate([
-            'text' => 'required|string|max:1000'
+            'text' => 'required|string|max:1000',
+            'context' => 'nullable|string|max:2000'
         ]);
 
         $text = $request->input('text');
+        $context = $request->input('context'); // Menangkap kalimat utuh dari reader.js
         $apiKey = env('GROQ_API_KEY');
 
-        // Pastikan API Key ada di file .env
         if (!$apiKey) {
             return response()->json([
-                'error' => 'API Key Groq belum diatur di sistem (.env).'
+                'error' => 'API Key Groq belum diatur di file .env.'
             ], 500);
         }
 
-        // 2. Prompt sistem (Instruksi ketat agar Groq merespons dalam format JSON)
-        $systemPrompt = "You are an expert English teacher helping an Indonesian student. Analyze the given English text/word. You MUST reply ONLY with a valid JSON object. Do not add markdown blocks like ```json. The JSON must have exactly these keys:
-        'explanation': (string) Clear English explanation of the word/phrase.
-        'translation': (string) Indonesian translation.
-        'grammar': (string) Grammar context or part of speech in Indonesian.
-        'vocabulary': (array of strings) 2 to 3 related English words or synonyms.
-        'idiom_note': (string) If it's an idiom, explain briefly in Indonesian. If not, leave empty.
-        'tip': (string) A short, encouraging tip about using this word in Indonesian.";
+        // 2. Prompt instruksi dengan format JSON Object murni menggunakan double quotes
+        $systemPrompt = "You are an expert English teacher helping an Indonesian student. Analyze the given English word or phrase BASED ON the context sentence provided. You MUST reply ONLY with a valid JSON object. Do not add markdown blocks like ```json.
+        The JSON must have exactly these keys:
+        {
+          \"explanation\": \"Clear English explanation of the word/phrase tailored to its specific meaning in the context sentence.\",
+          \"translation\": \"Accurate Indonesian translation matching its contextual meaning.\",
+          \"grammar\": \"Grammar context or part of speech in Indonesian (e.g., kata kerja, kata benda).\",
+          \"vocabulary\": [
+            {
+              \"word\": \"related word 1\",
+              \"type\": \"noun/verb/adjective\",
+              \"meaning\": \"Indonesian translation\",
+              \"example\": \"short English example sentence\"
+            },
+            {
+              \"word\": \"related word 2\",
+              \"type\": \"noun/verb/adjective\",
+              \"meaning\": \"Indonesian translation\",
+              \"example\": \"short English example sentence\"
+            }
+          ],
+          \"idiom_note\": \"Brief explanation in Indonesian if it is an idiom, otherwise leave empty string.\",
+          \"tip\": \"A short, encouraging tip about using this word in Indonesian.\"
+        }";
 
-       try {
-            // 3. Memanggil API Groq
-            $response = Http::withoutVerifying() // Tambahkan ini agar tidak diblokir SSL Windows lokal
+        $userPrompt = "Target Word: \"{$text}\"\nContext Sentence: \"{$context}\"";
+
+        try {
+            // 3. Panggil API Groq dengan Llama 3
+            $response = Http::withoutVerifying() 
                 ->withToken($apiKey)
-                ->timeout(15) // Batas waktu maksimal 15 detik
+                ->timeout(15) 
                 ->post('https://api.groq.com/openai/v1/chat/completions', [
-                    'model' => 'llama-3.3-70b-versatile',
+                    'model' => 'llama-3.3-70b-versatile', 
                     'messages' => [
                         ['role' => 'system', 'content' => $systemPrompt],
-                        ['role' => 'user', 'content' => $text]
+                        ['role' => 'user', 'content' => $userPrompt]
                     ],
                     'response_format' => ['type' => 'json_object'],
-                    'temperature' => 0.3, // Rendah agar format JSON stabil
+                    'temperature' => 0.2, 
                 ]);
 
             if ($response->successful()) {
                 $result = $response->json();
-                
-                // Mengambil teks balasan dari Groq
                 $content = $result['choices'][0]['message']['content'];
                 
-                // Mengubah string JSON dari AI menjadi Array PHP
+                // Decode string JSON dari AI menjadi array PHP
                 $aiData = json_decode($content, true);
 
-                // Kirim kembali ke browser (sesuai format yang diharapkan reader.js)
-                return response()->json([
-                    'data' => $aiData
-                ]);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    // DI SINI KUNCINYA: Membungkus kembali hasil ke dalam key 'data' 
+                    // agar lolos kondisi pengecekan `if(result.data)` di reader.js
+                    return response()->json([
+                        'data' => $aiData
+                    ]);
+                }
+                
+                return response()->json(['error' => 'AI tidak mengembalikan format JSON yang valid.'], 500);
             }
 
-            // Jika API Groq menolak request (misal kuota habis)
             return response()->json([
-                'error' => 'Gagal mendapatkan respons dari server AI Groq.',
+                'error' => 'API Groq error',
                 'details' => $response->body()
             ], $response->status());
 
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Terjadi kesalahan sistem saat menghubungi AI: ' . $e->getMessage()
+                'error' => 'Terjadi kesalahan: ' . $e->getMessage()
             ], 500);
         }
     }

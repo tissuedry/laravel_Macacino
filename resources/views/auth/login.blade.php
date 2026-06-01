@@ -1,5 +1,5 @@
 @extends('layouts.base')
-@section('title', 'Masuk — Readfolio')
+@section('title', 'Masuk — Macacino')
 
 @section('head')
 <style>

@@ -28,7 +28,6 @@ const docTitleEl     = document.getElementById('doc-title');
 const hlToggleBtn    = document.getElementById('highlights-toggle-btn');
 const hlSidebar      = document.getElementById('highlights-sidebar');
 
-// Get CSRF Token helper
 const getCsrfToken = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -40,7 +39,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   bindSidebarAudio();
   initResizableSidebars(); 
   bindFocusThemes();
-  
   bindHighlightClicks();
 
   const style = document.createElement('style');
@@ -96,10 +94,57 @@ function showConfirmModal(title, message, confirmText, onConfirm) {
     });
 }
 
+// ── FUNGSI GENERATOR HTML MORE DETAILS ─────────────────────────
+function generateMoreDetailsHtml(grammar, vocabulary, idiomNote, tip, selectedText) {
+    let vocabHtml = '';
+    if (vocabulary && vocabulary.length > 0) {
+        vocabHtml = '<ul class="md-vocab-list">';
+        vocabulary.forEach(v => {
+            vocabHtml += `<li><strong>${v.word}</strong> <span class="type">(${v.type})</span>: ${v.meaning} <span class="example">✏️ Ex: "${v.example}"</span></li>`;
+        });
+        vocabHtml += '</ul>';
+    } else {
+        vocabHtml = '<p style="color:var(--text-muted); font-style:italic; margin:0; font-size:0.9em;">Tidak ada kosakata terkait.</p>';
+    }
+
+    const encodedText = encodeURIComponent(selectedText || '');
+
+    return `
+        <div class="md-card md-card-pronounce">
+            <h4 class="md-card-title">🗣️ Real-World Pronunciation</h4>
+            <p style="margin:0 0 10px 0; font-size:0.85em; color:var(--text-secondary); line-height:1.45;">Lihat cara penutur asli melafalkannya di ribuan video YouTube:</p>
+            <a href="https://youglish.com/pronounce/${encodedText}/english" target="_blank" class="btn-youglish">
+                🚀 Cari di YouGlish
+            </a>
+        </div>
+        <div class="md-card">
+            <h5 class="md-card-title">⚙️ Grammar Context</h5>
+            <div style="font-size:0.9em; color:var(--text-secondary); line-height:1.5; white-space:pre-line;">
+                ${grammar ? grammar : '<span style="color:var(--text-muted); font-style:italic;">Tidak ada konteks grammar khusus.</span>'}
+            </div>
+        </div>
+        <div class="md-card">
+            <h5 class="md-card-title">📚 Key Vocabulary & Synonyms</h5>
+            <div style="font-size:0.9em;">${vocabHtml}</div>
+        </div>
+        <div class="md-card">
+            <h5 class="md-card-title">🗣️ Idioms / Phrases</h5>
+            <div style="font-size:0.9em; color:var(--text-secondary); line-height:1.5;">
+                ${idiomNote ? idiomNote : '<span style="color:var(--text-muted); font-style:italic;">Bukan merupakan ungkapan/idiom.</span>'}
+            </div>
+        </div>
+        <div class="md-card" style="border: 1px solid rgba(52, 211, 153, 0.3); background: rgba(52, 211, 153, 0.05);">
+            <h5 class="md-card-title" style="color:var(--success);">💡 Pro Tip</h5>
+            <div style="font-size:0.9em; line-height:1.5;">
+                ${tip ? `<span style="font-style:italic; color:var(--text-primary);">${tip}</span>` : '<span style="color:var(--text-muted); font-style:italic;">Tidak ada tips tambahan.</span>'}
+            </div>
+        </div>
+    `;
+}
+
 function bindHighlightClicks() {
   const container = document.getElementById('html-text-container');
   if (!container) return;
-
   container.addEventListener('click', (e) => {
     const mark = e.target.closest('mark.saved-highlight-mark');
     if (mark) {
@@ -112,7 +157,6 @@ function bindHighlightClicks() {
           if (hlSidebar && hlSidebar.classList.contains('collapsed')) {
               if(hlToggleBtn) hlToggleBtn.click();
           }
-
           setTimeout(() => {
               noteCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
               noteCard.classList.remove('flash-highlight');
@@ -142,6 +186,7 @@ function applySavedHighlightsToText(notes) {
   htmlContainer.innerHTML = containerHtml;
 }
 
+// ── RENDER CATATAN DI SIDEBAR KIRI ─────────────────────────────
 async function loadSidebarNotes(pageNum) {
   try {
     const res  = await fetch(`/api/highlights/document/${DOCUMENT_ID}`);
@@ -160,19 +205,16 @@ async function loadSidebarNotes(pageNum) {
         const safeSelectedText = encodeURIComponent(note.text_content || '');
         const safeExplanation  = encodeURIComponent(note.ai_explanation || '');
 
-        const grammar    = note.ai_grammar    || null;
-        const idiomNote  = note.ai_idiom_note || null;
-        const vocabulary = note.ai_vocabulary || [];
-        const tip        = null; 
-
-        let vocabHtml = '';
-        if (vocabulary && vocabulary.length > 0) {
-          vocabHtml = `<ul class="snc-vocab-list">`;
-          vocabulary.forEach(v => {
-            vocabHtml += `<li><span class="snc-vocab-word">${v.word}</span> <span class="snc-vocab-type">(${v.type})</span> <span class="snc-vocab-meaning">${v.meaning}</span> <span class="snc-vocab-example">✏️ "${v.example}"</span></li>`;
-          });
-          vocabHtml += `</ul>`;
+        let detailsObj = {};
+        if (note.ai_details) {
+            try { detailsObj = typeof note.ai_details === 'string' ? JSON.parse(note.ai_details) : note.ai_details; } catch(e){}
         }
+        const grammar = detailsObj.grammar || note.ai_grammar || null;
+        const idiomNote = detailsObj.idiom_note || note.ai_idiom_note || null;
+        const vocabulary = detailsObj.vocabulary || note.ai_vocabulary || [];
+        const tip = detailsObj.tip || null;
+
+        const moreDetailsHtml = generateMoreDetailsHtml(grammar, vocabulary, idiomNote, tip, note.text_content);
 
         html += `
           <div class="sidebar-note-card ai-saved-note" id="note-card-${note.id}">
@@ -213,13 +255,9 @@ async function loadSidebarNotes(pageNum) {
                 </div>
               </details>
               <details class="snc-details">
-                <summary>✨ More Details <span class="snc-arrow">▼</span></summary>
-                <div class="snc-details-body">
-                  ${grammar ? `<div style="margin-bottom:12px;"><div style="font-size:0.82em; font-weight:700; color:var(--primary); margin-bottom:5px; text-transform:uppercase; letter-spacing:0.4px;">⚙️ Grammar Context</div><div style="margin:0; line-height:1.55; white-space: pre-line;">${grammar}</div></div>` : ''}
-                  ${vocabHtml ? `<div style="margin-bottom:12px;"><div style="font-size:0.82em; font-weight:700; color:var(--primary); margin-bottom:5px; text-transform:uppercase; letter-spacing:0.4px;">📚 Key Vocabulary</div>${vocabHtml}</div>` : ''}
-                  ${idiomNote ? `<div style="margin-bottom:6px;"><div style="font-size:0.82em; font-weight:700; color:var(--primary); margin-bottom:5px; text-transform:uppercase; letter-spacing:0.4px;">🗣️ Idioms / Phrases</div><p style="margin:0; line-height:1.55;">${idiomNote}</p></div>` : ''}
-                  ${tip ? `<div style="margin-bottom:6px;"><div style="font-size:0.82em; font-weight:700; color:var(--success); margin-bottom:5px; text-transform:uppercase; letter-spacing:0.4px;">💡 Pro Tip</div><p style="margin:0; line-height:1.55; font-style:italic;">${tip}</p></div>` : ''}
-                  ${!grammar && !vocabHtml && !idiomNote && !tip ? `<p style="margin:0; color:var(--text-muted); font-size:0.88em; font-style:italic; text-align:center; padding:8px 0;">💡 Detail belum tersedia.</p>` : ''}
+                <summary>✨ More Details & YouGlish <span class="snc-arrow">▼</span></summary>
+                <div class="snc-details-body" style="padding: 12px; background: transparent;">
+                  ${moreDetailsHtml}
                 </div>
               </details>
             </div>
@@ -310,14 +348,12 @@ function bindDeleteNotes() {
 function bindDeleteAllNotes() {
     const btnAll = document.getElementById('delete-all-notes-btn');
     if (!btnAll) return;
-    
     btnAll.addEventListener('click', () => {
         const deleteBtns = document.querySelectorAll('.delete-note-btn');
         if (deleteBtns.length === 0) {
             showToast('Tidak ada catatan di dokumen ini untuk dihapus.', 'warning');
             return;
         }
-        
         showConfirmModal(
             'Hapus SEMUA Catatan',
             `Anda akan menghapus <b style="color:var(--text-primary);">${deleteBtns.length} catatan</b> beserta stabilo di dokumen ini secara permanen.<br><br>Apakah Anda sangat yakin?`,
@@ -398,16 +434,13 @@ async function renderPage(pageNum) {
     });
     
     if (currentParagraph) { textHTML += `<p>${currentParagraph}</p>`; }
-
     if(htmlContainer) htmlContainer.innerHTML = textHTML || '<p class="text-muted" style="text-align:center;">Halaman ini kosong.</p>';
-    
     if(pdfLoading) pdfLoading.style.display = 'none';
     if(centerWrapper) centerWrapper.hidden = false; 
     const pdfAreaEl = document.getElementById('pdf-area');
     if(pdfAreaEl) pdfAreaEl.scrollTop = 0;
 
     await loadSidebarNotes(pageNum);
-
     if (document.body.classList.contains('focus-mode-active')) updateFocusModeText();
 
     const csrfToken = getCsrfToken();
@@ -433,17 +466,13 @@ function bindNav() {
       const temporaryHighlights = document.querySelectorAll('span.temp-highlight');
       temporaryHighlights.forEach(span => {
           const parent = span.parentNode;
-          while (span.firstChild) {
-              parent.insertBefore(span.firstChild, span);
-          }
-          parent.removeChild(span);
-          parent.normalize(); 
+          while (span.firstChild) parent.insertBefore(span.firstChild, span);
+          parent.removeChild(span); parent.normalize(); 
       });
       window.getSelection().removeAllRanges(); 
         
       const isHidden = htmlContainer.classList.toggle('hide-highlights');
       const icon = toggleHighlightsBtn.querySelector('svg');
-      
       if (isHidden) {
         icon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
         toggleHighlightsBtn.title = "Tampilkan Stabilo";
@@ -506,6 +535,7 @@ function applyHighlightMarker() {
   catch (e) { console.warn('Highlight melintasi paragraf, dibatalkan.'); }
 }
 
+// ── RENDER ANALISIS BARU DI SIDEBAR KANAN ──────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   const tooltip      = document.getElementById('selection-tooltip');
   const analyzeBtn   = document.getElementById('analyze-btn');
@@ -518,20 +548,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.addEventListener('mouseup', (e) => {
     if (analyzeBtn && analyzeBtn.classList.contains('loading-magic')) return;
-
     const selection = window.getSelection();
     const text = selection.toString().trim();
-    
     if (text.length > 0 && tooltip && !tooltip.contains(e.target) && aiPanel && !aiPanel.contains(e.target)) {
-      
       const wordCount = text.split(/\s+/).filter(w => w.length > 0).length;
       if (wordCount > 7) {
           showToast(`Terlalu panjang (${wordCount} kata). AI khusus untuk frasa pendek / vocab (Maks: 7 kata).`, 'warning');
           selection.removeAllRanges(); 
-          tooltip.hidden = true;
-          return;
+          tooltip.hidden = true; return;
       }
-
       selectedText = text;
       contextText  = (selection.anchorNode && selection.anchorNode.parentNode) ? selection.anchorNode.parentNode.textContent.trim() : text;
       
@@ -539,9 +564,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tooltip.style.left     = `${e.clientX}px`;
       tooltip.style.top      = `${e.clientY + 15}px`;
       tooltip.hidden = false;
-    } else if (text.length === 0 && tooltip) { 
-      tooltip.hidden = true; 
-    }
+    } else if (text.length === 0 && tooltip) { tooltip.hidden = true; }
   });
 
   if (pdfArea && tooltip) pdfArea.addEventListener('scroll', () => { 
@@ -575,6 +598,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (response.ok && result.data) {
           const data = result.data;
           
+          const dynamicCardsHtml = generateMoreDetailsHtml(data.grammar, data.vocabulary, data.idiom_note, data.tip, selectedText);
+          
           let htmlContent = `
             <div class="ai-stack">
               <div class="ai-selected-text-box">
@@ -593,7 +618,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
               <div style="margin-bottom:1.5rem; padding:0 5px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                  <h4 style="margin:0; color:#0d6efd; font-size:1.1em;">🧠 English Explanation</h4>
+                  <h4 style="margin:0; color:var(--primary); font-size:1.1em;">🧠 English Explanation</h4>
                   <div style="display:flex; gap:4px;">
                       <button id="play-exp-us-btn" class="play-audio-btn" title="Dengarkan Penjelasan (US)">🇺🇸</button>
                       <button id="play-exp-uk-btn" class="play-audio-btn" title="Dengarkan Penjelasan (UK)">🇬🇧</button>
@@ -608,19 +633,19 @@ document.addEventListener('DOMContentLoaded', () => {
               </div>
 
               <div id="locked-section" style="pointer-events:none; opacity:0.35; filter:blur(2px); transition:all 0.4s ease;">
-                <details open><summary>🇮🇩 Indonesian Translation</summary><div class="details-content"><p style="margin-bottom:0;">${data.translation}</p></div></details>
-                <details><summary>✨ More Details</summary><div class="details-content">`;
-          
-          if (data.grammar) htmlContent += `<h5 style="margin-top:0; color:#0d6efd;">⚙️ Grammar Context</h5><div style="margin-bottom:15px; white-space: pre-line; line-height: 1.6; font-size: 0.95em;">${data.grammar}</div>`;
-          if (data.vocabulary && data.vocabulary.length > 0) {
-            htmlContent += `<h5 style="color:#0d6efd;">📚 Key Vocabulary</h5><ul style="padding-left:20px; margin:0; margin-bottom:15px;">`;
-            data.vocabulary.forEach(v => htmlContent += `<li style="margin-bottom:8px;"><b>${v.word}</b> <i>(${v.type})</i>: ${v.meaning}<br><span style="color:var(--text-muted); font-size:0.9em;">Ex: "${v.example}"</span></li>`);
-            htmlContent += `</ul>`;
-          }
-          if (data.idiom_note) htmlContent += `<h5 style="color:#0d6efd;">🗣️ Idioms / Phrases</h5><p style="margin-bottom:15px;">${data.idiom_note}</p>`;
-          if (data.tip) htmlContent += `<h5 style="color:#198754;">💡 Pro Tip</h5><p style="font-style:italic;">${data.tip}</p>`;
+                <details open style="margin-bottom: 12px;"><summary>🇮🇩 Indonesian Translation</summary><div class="details-content"><p style="margin-bottom:0;">${data.translation}</p></div></details>
+                
+                <button id="open-more-details-btn" class="btn-trigger-modal">
+                   <span>✨</span> Lihat Detail Selengkapnya & Pengucapan
+                </button>
 
-          htmlContent += `</div></details></div></div><button id="save-ai-note-btn" class="save-note-btn"><span>📝</span> Simpan Catatan</button>`;
+                <div id="inline-details-container" style="display: none; border-top: 1px dashed var(--border); padding-top: 15px; margin-top: 15px;">
+                    ${dynamicCardsHtml}
+                </div>
+              </div>
+            </div>
+            <button id="save-ai-note-btn" class="save-note-btn"><span>📝</span> Simpan Catatan</button>
+          `;
           
           aiPanelBody.innerHTML = htmlContent;
 
@@ -629,8 +654,27 @@ document.addEventListener('DOMContentLoaded', () => {
           document.getElementById('play-exp-us-btn')?.addEventListener('click', () => playAudio(data.explanation, 'american'));
           document.getElementById('play-exp-uk-btn')?.addEventListener('click', () => playAudio(data.explanation, 'british'));
 
-          const unlockBtn = document.getElementById('unlock-btn'); const lockedSec = document.getElementById('locked-section');
-          if (unlockBtn && lockedSec) unlockBtn.addEventListener('click', () => { lockedSec.style.pointerEvents = 'auto'; lockedSec.style.opacity = '1'; lockedSec.style.filter = 'none'; document.getElementById('unlock-gate').innerHTML = `<span style="font-size:0.82em; color:#198754; font-weight:600;">✅ Terbuka</span>`; });
+          // Logika Buka Kunci (Unlock Gate)
+          const unlockBtn = document.getElementById('unlock-btn'); 
+          const lockedSec = document.getElementById('locked-section');
+          if (unlockBtn && lockedSec) {
+              unlockBtn.addEventListener('click', () => { 
+                  lockedSec.style.pointerEvents = 'auto'; 
+                  lockedSec.style.opacity = '1'; 
+                  lockedSec.style.filter = 'none'; 
+                  document.getElementById('unlock-gate').innerHTML = `<span style="font-size:0.82em; color:#198754; font-weight:600;">✅ Terbuka</span>`; 
+              });
+          }
+
+          // Logika Klik Tombol Biru (Buka Detail Inline di Sidebar)
+          const openMoreBtn = document.getElementById('open-more-details-btn');
+          const inlineContainer = document.getElementById('inline-details-container');
+          if (openMoreBtn && inlineContainer) {
+              openMoreBtn.addEventListener('click', () => {
+                  inlineContainer.style.display = 'block'; // Memunculkan kartu detail
+                  openMoreBtn.style.display = 'none'; // Menghilangkan tombol agar UI tidak berantakan
+              });
+          }
 
           const saveNoteBtn = document.getElementById('save-ai-note-btn');
           if (saveNoteBtn) saveNoteBtn.addEventListener('click', async () => {
@@ -659,14 +703,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           });
         } else { 
-            aiPanelBody.innerHTML = `<div style="text-align:center; padding:2rem 1rem;"><h4 style="color:#dc3545;">Gagal Menganalisis</h4></div>`; 
+            aiPanelBody.innerHTML = `<div style="text-align:center; padding:2rem 1rem;"><h4 style="color:var(--danger);">Gagal Menganalisis</h4></div>`; 
             showToast('AI gagal memproses teks.', 'error');
         }
       } catch (error) { 
         analyzeBtn.classList.remove('loading-magic');
         if (tooltip) tooltip.hidden = true;
         if(aiPanel) aiPanel.hidden = false;
-        if(aiPanelBody) aiPanelBody.innerHTML = `<div style="text-align:center; padding:2rem 1rem;"><h4 style="color:#dc3545;">Koneksi Gagal</h4></div>`; 
+        if(aiPanelBody) aiPanelBody.innerHTML = `<div style="text-align:center; padding:2rem 1rem;"><h4 style="color:var(--danger);">Koneksi Gagal</h4></div>`; 
         showToast('Koneksi internet terputus.', 'error');
       }
     });

@@ -15,7 +15,7 @@
   #focus-overlay.bg-paper        { background-color: #FFFFFF; color: #2A2621; }
   #focus-overlay.bg-buram        { background-color: #F5F5F4; color: #333333; }
   #focus-overlay.bg-sepia        { background-color: #F4ECD8; color: #433422; }
-  #focus-overlay.bg-solar-light { background-color: #FDF6E3; color: #586E75; }
+  #focus-overlay.bg-solar-light  { background-color: #FDF6E3; color: #586E75; }
   #focus-overlay.bg-nord         { background-color: #2E3440; color: #D8DEE9; }
   #focus-overlay.bg-gruvbox      { background-color: #282828; color: #EBDBB2; }
   #focus-overlay.bg-midnight     { background-color: #0F172A; color: #F1F5F9; }
@@ -78,15 +78,7 @@
   .snc-details summary:hover { background: var(--border); }
   .snc-arrow { font-size: 0.8em; color: var(--text-muted); transition: transform 0.2s; }
   .snc-details[open] summary .snc-arrow { transform: rotate(180deg); }
-  .snc-details-body { padding: 12px; font-size: 0.85em; line-height: 1.6; color: var(--text-primary); background: var(--surface); }
   
-  .snc-vocab-list { list-style: none; padding: 0; margin: 6px 0 0 0; }
-  .snc-vocab-list li { padding: 8px; border-radius: 5px; margin-bottom: 5px; background: var(--bg-warm); border: 1px solid var(--border); }
-  .snc-vocab-word { font-weight: 700; color: var(--primary); }
-  .snc-vocab-type { font-style: italic; color: var(--text-muted); font-size: 0.9em; margin-left: 4px; }
-  .snc-vocab-meaning { display: block; margin-top: 2px; }
-  .snc-vocab-example { display: block; margin-top: 3px; color: var(--text-muted); font-size: 0.88em; }
-
   .ai-panel-body { word-wrap: break-word; overflow-wrap: break-word; overflow-x: hidden; }
   
   .ai-stack details { background:var(--bg-secondary,#f8f9fa); border:1px solid var(--border,#e9ecef); border-radius:8px; margin-bottom:10px; overflow:hidden; }
@@ -104,24 +96,25 @@
   .play-audio-btn:hover { background:var(--bg-hover,#e2e6ea); color:var(--primary); }
   .ai-selected-text-box { background:var(--bg-secondary,#f8f9fa); padding:10px 12px; border-radius:8px; margin-bottom:1rem; border:1px solid var(--border,#e9ecef); word-wrap: break-word; overflow-wrap: break-word; overflow-x: hidden; }
 
-  /* CSS KHUSUS MODAL / POP-UP SAJA */
-.maca-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(5px); z-index: 9999; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; }
-.maca-modal-content { background: #1e293b; color: #f1f5f9; padding: 30px; border-radius: 16px; width: 90%; max-width: 500px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); transform: translateY(20px); transition: transform 0.3s ease; font-family: 'Inter', sans-serif; }
-.maca-modal-overlay.active { display: flex; opacity: 1; }
-.maca-modal-overlay.active .maca-modal-content { transform: translateY(0); }
-.maca-modal-title { font-size: 22px; font-weight: 700; margin-bottom: 15px; color: #38bdf8; border-bottom: 1px solid #334155; padding-bottom: 10px; }
-.maca-modal-body p { margin-bottom: 15px; line-height: 1.6; color: #cbd5e1; }
-.maca-modal-body strong { color: #f8fafc; }
-.btn-youglish { display: block; width: 100%; text-align: center; background: #ef4444; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 20px; transition: background 0.2s; }
-.btn-youglish:hover { background: #dc2626; }
-.btn-close-modal { display: block; width: 100%; text-align: center; background: transparent; color: #94a3b8; border: 1px solid #475569; padding: 10px; border-radius: 8px; margin-top: 10px; cursor: pointer; transition: all 0.2s; }
-.btn-close-modal:hover { background: #334155; color: white; }
-.btn-trigger-modal { width: 100%; background: #38bdf8; color: #0f172a; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.2s; }
-.btn-trigger-modal:hover { background: #0ea5e9; }
+  /* --- DESAIN KARTU 'MORE DETAILS' UNTUK SIDEBAR KANAN & KIRI --- */
+  .md-card { background: var(--bg-secondary, #f8f9fa); border: 1px solid var(--border, #e9ecef); border-radius: 8px; padding: 14px; margin-bottom: 12px; }
+  .md-card-title { margin: 0 0 8px 0; color: var(--primary, #0d6efd); font-size: 0.82em; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; font-weight: 700; }
+  
+  /* Kartu Spesial Pronunciation (Aksen Merah) */
+  .md-card-pronounce { background: rgba(237, 66, 69, 0.05); border: 1px solid rgba(237, 66, 69, 0.2); }
+  .md-card-pronounce .md-card-title { color: #ed4245; }
+  
+  .btn-youglish { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #ed4245; color: white; padding: 10px 15px; border-radius: 6px; text-decoration: none; font-weight: 700; transition: background 0.2s; font-size: 13.5px; width: 100%; box-sizing: border-box; margin-top: 6px;}
+  .btn-youglish:hover { background: #d03a3d; color: white; text-decoration: none;}
 
+  /* Custom List untuk Vocabulary */
+  .md-vocab-list { padding-left: 0; margin: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .md-vocab-list li { color: var(--text-primary); line-height: 1.5; font-size: 0.9em; padding-bottom: 8px; border-bottom: 1px dashed var(--border); }
+  .md-vocab-list li:last-child { border-bottom: none; padding-bottom: 0; }
+  .md-vocab-list strong { color: var(--primary); font-weight: 700; font-size: 1.05em; }
+  .md-vocab-list .type { font-style: italic; color: var(--text-muted); font-size: 0.9em; margin-right: 4px; }
+  .md-vocab-list .example { color: var(--text-muted); font-size: 0.9em; display: block; margin-top: 4px; }
 </style>
-
-
 @endsection
 
 @section('body')
@@ -209,7 +202,7 @@
         <div id="html-text-container" class="clean-text-reader"></div>
         <div class="resizer right-edge" id="center-resizer-right" title="Tarik untuk mengubah lebar kertas"></div>
       </div>
-      </div>
+    </div>
 
     <aside class="ai-panel" id="ai-panel" hidden>
       <div class="resizer left-edge" id="right-resizer" title="Tarik untuk mengubah lebar panel AI"></div>
@@ -261,9 +254,8 @@
       <button class="focus-theme-btn" data-theme="bg-zen" title="Zen Dark" style="background: #121212; border: 1px solid rgba(255,255,255,0.1);"></button>
     </div>
   </div>
+
 </div>
-
-
 @endsection
 
 @section('scripts')
@@ -271,7 +263,6 @@
   if (!document.body.classList.contains('theme-light') && !document.body.classList.contains('theme-dark')) {
       document.body.classList.add('theme-light');
   }
-  
   window.DOCUMENT_ID = "{{ $document_id }}";
 </script>
 <script src="{{ asset('js/reader.js') }}"></script>

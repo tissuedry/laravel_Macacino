@@ -1,5 +1,5 @@
 @extends('layouts.base')
-@section('title', 'Readfolio — Learning Statistics')
+@section('title', 'Macacino — Learning Statistics')
 
 @section('head')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
