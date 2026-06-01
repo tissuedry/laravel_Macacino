@@ -95,16 +95,41 @@ function showConfirmModal(title, message, confirmText, onConfirm) {
 }
 
 // ── FUNGSI GENERATOR HTML MORE DETAILS ─────────────────────────
-function generateMoreDetailsHtml(grammar, vocabulary, idiomNote, tip, selectedText) {
-    let vocabHtml = '';
-    if (vocabulary && vocabulary.length > 0) {
-        vocabHtml = '<ul class="md-vocab-list">';
-        vocabulary.forEach(v => {
-            vocabHtml += `<li><strong>${v.word}</strong> <span class="type">(${v.type})</span>: ${v.meaning} <span class="example">✏️ Ex: "${v.example}"</span></li>`;
-        });
-        vocabHtml += '</ul>';
+function generateMoreDetailsHtml(grammar, collocations, idiomNote, tip, selectedText, nuance, tenseInfo) {
+    // Collocations
+    let collocHtml = '';
+    if (collocations && collocations.length > 0) {
+        collocHtml = collocations.map(c =>
+            `<span style="display:inline-block; background:var(--bg-warm); border:1px solid var(--border); border-radius:20px; padding:3px 10px; font-size:0.85em; margin:3px 2px; color:var(--text-primary);">${c}</span>`
+        ).join('');
     } else {
-        vocabHtml = '<p style="color:var(--text-muted); font-style:italic; margin:0; font-size:0.9em;">Tidak ada kosakata terkait.</p>';
+        collocHtml = '<span style="color:var(--text-muted); font-style:italic; font-size:0.9em;">Tidak ada kolokasi umum.</span>';
+    }
+
+    // Nuance
+    let nuanceHtml = '';
+    if (nuance && nuance.trim()) {
+        const nuanceLower = nuance.toLowerCase();
+        let nuanceColor = '#6c757d'; // default netral
+        let nuanceEmoji = '⚪';
+        if (nuanceLower.includes('negatif') || nuanceLower.includes('sarkas') || nuanceLower.includes('kasar')) {
+            nuanceColor = '#dc3545'; nuanceEmoji = '🔴';
+        } else if (nuanceLower.includes('positif') || nuanceLower.includes('formal') || nuanceLower.includes('sopan')) {
+            nuanceColor = '#198754'; nuanceEmoji = '🟢';
+        } else if (nuanceLower.includes('netral')) {
+            nuanceColor = '#6c757d'; nuanceEmoji = '⚪';
+        }
+        nuanceHtml = `<span style="font-weight:700; color:${nuanceColor}; font-size:0.95em;">${nuanceEmoji} ${nuance}</span>`;
+    } else {
+        nuanceHtml = '<span style="color:var(--text-muted); font-style:italic; font-size:0.9em;">Tidak ada nuansa khusus.</span>';
+    }
+
+    // Tense Info
+    let tenseHtml = '';
+    if (tenseInfo && tenseInfo.trim()) {
+        tenseHtml = `<div style="font-size:0.9em; color:var(--text-secondary); line-height:1.7; white-space:pre-line;">${tenseInfo}</div>`;
+    } else {
+        tenseHtml = '<span style="color:var(--text-muted); font-style:italic; font-size:0.9em;">Bukan kata kerja / tidak ada info tense.</span>';
     }
 
     const encodedText = encodeURIComponent(selectedText || '');
@@ -124,8 +149,16 @@ function generateMoreDetailsHtml(grammar, vocabulary, idiomNote, tip, selectedTe
             </div>
         </div>
         <div class="md-card">
-            <h5 class="md-card-title">📚 Key Vocabulary & Synonyms</h5>
-            <div style="font-size:0.9em;">${vocabHtml}</div>
+            <h5 class="md-card-title">🔗 Common Collocations</h5>
+            <div style="padding-top:4px;">${collocHtml}</div>
+        </div>
+        <div class="md-card">
+            <h5 class="md-card-title">🎭 Word Nuance & Connotation</h5>
+            <div>${nuanceHtml}</div>
+        </div>
+        <div class="md-card">
+            <h5 class="md-card-title">🕐 Tense / Verb Forms</h5>
+            ${tenseHtml}
         </div>
         <div class="md-card">
             <h5 class="md-card-title">🗣️ Idioms / Phrases</h5>
@@ -211,7 +244,9 @@ async function loadSidebarNotes(pageNum) {
         }
         const grammar = detailsObj.grammar || note.ai_grammar || null;
         const idiomNote = detailsObj.idiom_note || note.ai_idiom_note || null;
-        const vocabulary = detailsObj.vocabulary || note.ai_vocabulary || [];
+        const collocations = detailsObj.collocations || [];
+        const nuance = detailsObj.nuance || null;
+        const tenseInfo = detailsObj.tense_info || null;
         const tip = detailsObj.tip || null;
 
         const moreDetailsHtml = generateMoreDetailsHtml(grammar, vocabulary, idiomNote, tip, note.text_content);
@@ -237,26 +272,30 @@ async function loadSidebarNotes(pageNum) {
             <div class="snc-accordion">
               <details class="snc-details">
                 <summary>🧠 English Explanation <span class="snc-arrow">▼</span></summary>
-                <div class="snc-details-body">
-                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <div class="snc-details-body" style="padding: 12px 16px; box-sizing: border-box; word-wrap: break-word; width: 100%;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                     <span style="font-weight:700; font-size:0.9em; color:var(--primary);">AI Explanation</span>
                     <div style="display:flex; gap:4px;">
                         <button class="snc-audio-btn play-sidebar-btn" data-text="${safeExplanation}" data-accent="american" title="Penjelasan (US)">🇺🇸</button>
                         <button class="snc-audio-btn play-sidebar-btn" data-text="${safeExplanation}" data-accent="british" title="Penjelasan (UK)">🇬🇧</button>
                     </div>
                   </div>
-                  <p style="margin:0; font-style:italic;">${note.ai_explanation || 'Tidak ada penjelasan.'}</p>
+                  <!-- Ukuran teks disamakan dengan sidebar kanan -->
+                  <p style="margin:0; font-size:0.95em; line-height:1.6; color:var(--text-primary);">${note.ai_explanation || 'Tidak ada penjelasan.'}</p>
                 </div>
               </details>
               <details class="snc-details">
                 <summary>🇮🇩 Terjemahan Indonesia <span class="snc-arrow">▼</span></summary>
-                <div class="snc-details-body">
-                  <p style="margin:0;">${note.ai_translation || 'Tidak ada terjemahan.'}</p>
+                <div class="snc-details-body" style="padding: 12px 16px; box-sizing: border-box; word-wrap: break-word; width: 100%;">
+                  <!-- Ukuran teks disamakan dengan sidebar kanan -->
+                  <p style="margin:0; font-size:0.95em; line-height:1.6; color:var(--text-primary);">${note.ai_translation || 'Tidak ada terjemahan.'}</p>
                 </div>
               </details>
+              
+              <!-- Menggunakan dropdown persis seperti yang di atasnya -->
               <details class="snc-details">
-                <summary>✨ More Details & YouGlish <span class="snc-arrow">▼</span></summary>
-                <div class="snc-details-body" style="padding: 12px; background: transparent;">
+                <summary>✨ Detail Selengkapnya <span class="snc-arrow">▼</span></summary>
+                <div class="snc-details-body" style="padding: 12px 16px; box-sizing: border-box; word-wrap: break-word; width: 100%; background: transparent;">
                   ${moreDetailsHtml}
                 </div>
               </details>
@@ -284,7 +323,11 @@ async function playAudio(text, accent = 'american') {
     const csrfToken = getCsrfToken();
     const response = await fetch('/api/ai/tts', { 
         method: 'POST', 
-        headers: csrfToken ? { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken } : { 'Content-Type': 'application/json' }, 
+        headers: { 
+            'Content-Type': 'application/json', 
+            'Accept': 'application/json', // Tambahkan ini
+            'X-CSRF-TOKEN': csrfToken || '' 
+        }, 
         body: JSON.stringify({ text: text, accent: accent }) 
     });
     if (!response.ok) throw new Error('Gagal memuat suara');
@@ -558,7 +601,22 @@ document.addEventListener('DOMContentLoaded', () => {
           tooltip.hidden = true; return;
       }
       selectedText = text;
-      contextText  = (selection.anchorNode && selection.anchorNode.parentNode) ? selection.anchorNode.parentNode.textContent.trim() : text;
+      let rawContext = (selection.anchorNode && selection.anchorNode.parentNode) ? selection.anchorNode.parentNode.textContent.trim() : text;
+      
+      // Jika teks context lebih dari 1500 karakter, kita potong secara cerdas
+      if (rawContext.length > 1500) {
+          let matchIndex = rawContext.indexOf(selectedText);
+          if (matchIndex !== -1) {
+              // Ambil 500 karakter sebelum dan 500 karakter sesudah kata yang dipilih agar AI tetap paham konteksnya
+              let start = Math.max(0, matchIndex - 500);
+              let end = Math.min(rawContext.length, matchIndex + selectedText.length + 500);
+              contextText = rawContext.substring(start, end) + "...";
+          } else {
+              contextText = rawContext.substring(0, 1500) + "...";
+          }
+      } else {
+          contextText = rawContext;
+      }
       
       tooltip.style.position = 'fixed';
       tooltip.style.left     = `${e.clientX}px`;
@@ -586,7 +644,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const csrfToken = getCsrfToken();
         const response = await fetch('/api/ai/explain', { 
             method: 'POST', 
-            headers: csrfToken ? { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken } : { 'Content-Type': 'application/json' }, 
+            headers: { 
+                'Content-Type': 'application/json', 
+                'Accept': 'application/json', // Tambahkan ini
+                'X-CSRF-TOKEN': csrfToken || '' 
+            }, 
             body: JSON.stringify({ text: selectedText, context: contextText }) 
         });
         const result = await response.json();
@@ -598,7 +660,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (response.ok && result.data) {
           const data = result.data;
           
-          const dynamicCardsHtml = generateMoreDetailsHtml(data.grammar, data.vocabulary, data.idiom_note, data.tip, selectedText);
+          const dynamicCardsHtml = generateMoreDetailsHtml(data.grammar, data.collocations, data.idiom_note, data.tip, selectedText, data.nuance, data.tense_info)
           
           let htmlContent = `
             <div class="ai-stack">
@@ -632,18 +694,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button id="unlock-btn" style="background:#0d6efd; color:#fff; border:none; border-radius:8px; padding:9px 22px; font-size:0.9em; font-weight:700; cursor:pointer;">✅ Saya Sudah Paham — Buka Terjemahan</button>
               </div>
 
-              <div id="locked-section" style="pointer-events:none; opacity:0.35; filter:blur(2px); transition:all 0.4s ease;">
-                <details open style="margin-bottom: 12px;"><summary>🇮🇩 Indonesian Translation</summary><div class="details-content"><p style="margin-bottom:0;">${data.translation}</p></div></details>
+            <div id="locked-section" style="pointer-events:none; opacity:0.35; filter:blur(2px); transition:all 0.4s ease;">
+                <details open style="margin-bottom: 12px;">
+                  <summary>🇮🇩 Indonesian Translation</summary>
+                  <div class="details-content"><p style="margin-bottom:0;">${data.translation}</p></div>
+                </details>
                 
-                <button id="open-more-details-btn" class="btn-trigger-modal">
-                   <span>✨</span> Lihat Detail Selengkapnya & Pengucapan
-                </button>
-
-                <div id="inline-details-container" style="display: none; border-top: 1px dashed var(--border); padding-top: 15px; margin-top: 15px;">
+                <!-- Diubah menjadi dropdown persis seperti Indonesian Translation -->
+                <details style="margin-bottom: 12px;">
+                  <summary>✨ More details</summary>
+                  <div class="details-content" style="padding-top: 10px;">
                     ${dynamicCardsHtml}
-                </div>
+                  </div>
+                </details>
               </div>
-            </div>
             <button id="save-ai-note-btn" class="save-note-btn"><span>📝</span> Simpan Catatan</button>
           `;
           
@@ -666,26 +730,21 @@ document.addEventListener('DOMContentLoaded', () => {
               });
           }
 
-          // Logika Klik Tombol Biru (Buka Detail Inline di Sidebar)
-          const openMoreBtn = document.getElementById('open-more-details-btn');
-          const inlineContainer = document.getElementById('inline-details-container');
-          if (openMoreBtn && inlineContainer) {
-              openMoreBtn.addEventListener('click', () => {
-                  inlineContainer.style.display = 'block'; // Memunculkan kartu detail
-                  openMoreBtn.style.display = 'none'; // Menghilangkan tombol agar UI tidak berantakan
-              });
-          }
+       
 
           const saveNoteBtn = document.getElementById('save-ai-note-btn');
           if (saveNoteBtn) saveNoteBtn.addEventListener('click', async () => {
             saveNoteBtn.innerHTML = '⏳ Menyimpan...'; saveNoteBtn.disabled = true;
             try {
               const csrfToken = getCsrfToken();
-              const res = await fetch('/api/highlights/ai-note', {
+                const res = await fetch('/api/highlights/ai-note', {
                 method: 'POST', 
-                headers: csrfToken ? { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken } : { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ document_id: DOCUMENT_ID, page_number: currentPage, text_content: selectedText, ai_explanation: data.explanation || '', ai_translation: data.translation || '', color: currentHighlightColor, ai_details: JSON.stringify({ grammar: data.grammar, vocabulary: data.vocabulary, idiom_note: data.idiom_note, tip: data.tip }) })
-              });
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'Accept': 'application/json', // Tambahkan ini
+                    'X-CSRF-TOKEN': csrfToken || '' 
+                },
+                body: JSON.stringify({ document_id: DOCUMENT_ID, page_number: currentPage, text_content: selectedText, ai_explanation: data.explanation || '', ai_translation: data.translation || '', color: currentHighlightColor, ai_details: JSON.stringify({ grammar: data.grammar, collocations: data.collocations, idiom_note: data.idiom_note, tip: data.tip, nuance: data.nuance, tense_info: data.tense_info })
               if (res.ok) { 
                   saveNoteBtn.innerHTML = '✅ Tersimpan'; 
                   showToast('Catatan berhasil disimpan.', 'success');
@@ -821,4 +880,8 @@ function initResizableSidebars() {
     setupResizer(rightResizer, aiPanel, false, false);
     setupResizer(centerResizerLeft, wrapper, true, true);
     setupResizer(centerResizerRight, wrapper, false, true);
+}
+
+function bindSidebarDetailsToggle() {
+    // placeholder — accordion sudah berjalan via native <details> HTML element
 }

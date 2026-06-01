@@ -2130,3 +2130,7 @@ input  { font-family: inherit; }
     border-radius: 4px;
     transition: width 0.6s ease;
 }
+
+/* Pastikan panel punya width default agar resizer bisa hitung offsetWidth */
+#ai-panel { width: 340px; min-width: 240px; }
+#highlights-sidebar { width: 300px; min-width: 200px; }

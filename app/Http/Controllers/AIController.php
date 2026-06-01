@@ -72,26 +72,15 @@ class AIController extends Controller
         }
 
         // 2. Prompt instruksi dengan format JSON Object murni menggunakan double quotes
-        $systemPrompt = "You are an expert English teacher helping an Indonesian student. Analyze the given English word or phrase BASED ON the context sentence provided. You MUST reply ONLY with a valid JSON object. Do not add markdown blocks like ```json.
+       $systemPrompt = "You are an expert English teacher helping an Indonesian student. Analyze the given English word or phrase BASED ON the context sentence provided. You MUST reply ONLY with a valid JSON object. Do not add markdown blocks like ```json.
         The JSON must have exactly these keys:
         {
           \"explanation\": \"Clear English explanation of the word/phrase tailored to its specific meaning in the context sentence.\",
           \"translation\": \"Accurate Indonesian translation matching its contextual meaning.\",
           \"grammar\": \"Grammar context or part of speech in Indonesian (e.g., kata kerja, kata benda).\",
-          \"vocabulary\": [
-            {
-              \"word\": \"related word 1\",
-              \"type\": \"noun/verb/adjective\",
-              \"meaning\": \"Indonesian translation\",
-              \"example\": \"short English example sentence\"
-            },
-            {
-              \"word\": \"related word 2\",
-              \"type\": \"noun/verb/adjective\",
-              \"meaning\": \"Indonesian translation\",
-              \"example\": \"short English example sentence\"
-            }
-          ],
+          \"collocations\": [\"common collocation 1\", \"common collocation 2\", \"common collocation 3\"],
+          \"nuance\": \"Brief description in Indonesian of the word's emotional tone or connotation (e.g., positif, negatif, netral, formal, sarkas). If neutral or no special nuance, leave empty string.\",
+          \"tense_info\": \"If the word is a verb, explain its forms in Indonesian: base (V1), past tense (V2), past participle (V3), present participle (V1+ing). Example: 'build → built → built → building'. If not a verb, leave empty string.\",
           \"idiom_note\": \"Brief explanation in Indonesian if it is an idiom, otherwise leave empty string.\",
           \"tip\": \"A short, encouraging tip about using this word in Indonesian.\"
         }";
