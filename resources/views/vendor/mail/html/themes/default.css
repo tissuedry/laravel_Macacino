@@ -1,0 +1,126 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+/* --- Base & Typography --- */
+body, 
+body *:not(html):not(style):not(br):not(tr):not(code) {
+    font-family: 'Inter', Helvetica, Arial, sans-serif !important;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #0f172a !important;
+    color: #f1f5f9 !important;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.wrapper, .body {
+    background-color: #0f172a !important;
+}
+
+/* --- Header --- */
+/* --- Header --- */
+.header {
+    text-align: center !important; /* Membuat posisi logo ke tengah */
+    padding: 40px 0 20px 0 !important;
+}
+
+.header a {
+    color: #f1f5f9 !important;
+    font-size: 32px !important; /* Ukuran proporsional untuk email */
+    font-weight: 700 !important;
+    font-family: 'Inter', sans-serif !important;
+    text-decoration: none !important;
+    letter-spacing: 1px !important; /* Jarak huruf renggang seperti halaman login */
+    display: inline-block;
+}
+
+/* --- Kotak Utama (The Box) --- */
+.inner-body {
+    background-color: #1e293b !important;
+    border-radius: 16px !important; /* Membuat ujung kotak membulat */
+    border: 1px solid #334155 !important;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+    margin: 0 auto !important;
+    overflow: hidden !important; /* Mencegah konten keluar dari lengkungan */
+    width: 570px !important;
+}
+
+/* Padding dalam kotak */
+.content-cell {
+    padding: 40px !important;
+}
+
+/* --- Typography Inside --- */
+h1 {
+    color: #f1f5f9 !important;
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    margin-top: 0 !important;
+    margin-bottom: 20px !important;
+}
+
+p {
+    color: #cbd5e1 !important;
+    font-size: 15px !important;
+    line-height: 1.6em !important;
+    margin-bottom: 24px !important;
+}
+
+/* --- Button Styling --- */
+.action {
+    width: 100% !important;
+    text-align: center !important;
+    margin: 30px auto !important;
+}
+
+.button {
+    border-radius: 30px !important; /* Bentuk kapsul persis seperti login */
+    font-weight: 600 !important;
+    padding: 12px 32px !important;
+    text-decoration: none !important;
+    display: inline-block !important;
+    transition: all 0.3s ease !important;
+    font-size: 15px !important;
+    letter-spacing: 0.5px !important;
+}
+
+.button-primary {
+    background-color: transparent !important;
+    border: 1.5px solid #475569 !important;
+    color: #f1f5f9 !important;
+}
+
+/* --- Subcopy (Teks kecil di bawah tombol) --- */
+.subcopy {
+    border-top: 1px solid #334155 !important;
+    margin-top: 30px !important;
+    padding-top: 25px !important;
+}
+
+.subcopy p {
+    font-size: 13px !important;
+    color: #94a3b8 !important;
+    line-height: 1.6em !important;
+}
+
+.subcopy a {
+    color: #38bdf8 !important;
+    text-decoration: none !important;
+    word-break: break-all;
+}
+
+/* --- Footer --- */
+.footer {
+    margin: 0 auto !important;
+    padding: 30px !important;
+    text-align: center !important;
+    width: 570px !important;
+}
+
+.footer p {
+    color: #64748b !important;
+    font-size: 13px !important;
+    text-align: center !important;
+}
