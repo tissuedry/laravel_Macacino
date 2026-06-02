@@ -62,7 +62,7 @@ class AIController extends Controller
         ]);
 
         $text = $request->input('text');
-        $context = $request->input('context'); // Menangkap kalimat utuh dari reader.js
+        $context = $request->input('context', 'Tidak ada konteks spesifik.'); // Fallback jika context kosong
         $apiKey = env('GROQ_API_KEY');
 
         if (!$apiKey) {
@@ -71,21 +71,29 @@ class AIController extends Controller
             ], 500);
         }
 
-        // 2. Prompt instruksi dengan format JSON Object murni menggunakan double quotes
-       $systemPrompt = "You are an expert English teacher helping an Indonesian student. Analyze the given English word or phrase BASED ON the context sentence provided. You MUST reply ONLY with a valid JSON object. Do not add markdown blocks like ```json.
-        The JSON must have exactly these keys:
-        {
-          \"explanation\": \"Clear English explanation of the word/phrase tailored to its specific meaning in the context sentence.\",
-          \"translation\": \"Accurate Indonesian translation matching its contextual meaning.\",
-          \"grammar\": \"Grammar context or part of speech in Indonesian (e.g., kata kerja, kata benda).\",
-          \"collocations\": [\"common collocation 1\", \"common collocation 2\", \"common collocation 3\"],
-          \"nuance\": \"Brief description in Indonesian of the word's emotional tone or connotation (e.g., positif, negatif, netral, formal, sarkas). If neutral or no special nuance, leave empty string.\",
-          \"tense_info\": \"If the word is a verb, explain its forms in Indonesian: base (V1), past tense (V2), past participle (V3), present participle (V1+ing). Example: 'build → built → built → building'. If not a verb, leave empty string.\",
-          \"idiom_note\": \"Brief explanation in Indonesian if it is an idiom, otherwise leave empty string.\",
-          \"tip\": \"A short, encouraging tip about using this word in Indonesian.\"
-        }";
+        // 2. Prompt instruksi: Penegasan HANYA menerjemahkan kata yang disorot
+$systemPrompt = "You are an expert English teacher helping an Indonesian student. 
+                The user will provide a 'Target Text' (which could be a single word, a phrase, or a full sentence) and a 'Context Sentence'.
+                
+                YOUR STRICT INSTRUCTIONS:
+                1. You MUST translate and explain the ENTIRE 'Target Text' provided.
+                2. If the 'Target Text' is a single word, use the 'Context Sentence' to find its specific meaning.
+                3. If the 'Target Text' is a full sentence, translate it accurately as a sentence.
+                4. You MUST reply ONLY with a valid JSON object. Do not add markdown blocks like ```json.
+                
+                The JSON must have exactly these keys:
+                {
+                \"explanation\": \"Clear English explanation of the Target Text. If it's a phrase/sentence, explain the overall meaning. in english only\",
+                \"translation\": \"Accurate Indonesian translation of the ENTIRE Target Text.\",
+                \"grammar\": \"If single word: Part of Speech (e.g., Kata Kerja, Kata Benda). If phrase/sentence: Grammatical Structure (e.g., Frasa Kata Sifat, Kalimat Lengkap). Write in Indonesian.\",
+                \"collocations\": [\"contoh 1: (arti)\", \"contoh 2: (arti)\"], // Jika Target Text adalah kalimat panjang, biarkan array ini KOSONG [].
+                \"nuance\": \"Brief description in Indonesian of the Target Text's connotation. Jika tidak ada, tulis 'Konteks umum'.\",
+                \"tense_info\": \"Identify the main Tense used (e.g., Simple Present Tense, Past Continuous). Briefly explain why it is used. If no verb, write 'Bukan kata kerja / Tidak relevan'.\",
+                \"idiom_note\": \"Brief explanation in Indonesian if the Target Text contains an idiom, otherwise write 'Bukan ungkapan/idiom'.\",
+                \"tip\": \"Provide a practical tip on how to use this word/phrase/sentence structure. Format: 'Sering digunakan dalam pola [sebutkan pola]. Contoh: [kalimat singkat].'\"
+                }";
 
-        $userPrompt = "Target Word: \"{$text}\"\nContext Sentence: \"{$context}\"";
+        $userPrompt = "Target Text: \"{$text}\"\nContext Sentence: \"{$context}\"";
 
         try {
             // 3. Panggil API Groq dengan Llama 3
@@ -93,7 +101,7 @@ class AIController extends Controller
                 ->withToken($apiKey)
                 ->timeout(15) 
                 ->post('https://api.groq.com/openai/v1/chat/completions', [
-                    'model' => 'llama-3.3-70b-versatile', 
+                    'model' => 'openai/gpt-oss-120b', 
                     'messages' => [
                         ['role' => 'system', 'content' => $systemPrompt],
                         ['role' => 'user', 'content' => $userPrompt]
@@ -106,12 +114,9 @@ class AIController extends Controller
                 $result = $response->json();
                 $content = $result['choices'][0]['message']['content'];
                 
-                // Decode string JSON dari AI menjadi array PHP
                 $aiData = json_decode($content, true);
 
                 if (json_last_error() === JSON_ERROR_NONE) {
-                    // DI SINI KUNCINYA: Membungkus kembali hasil ke dalam key 'data' 
-                    // agar lolos kondisi pengecekan `if(result.data)` di reader.js
                     return response()->json([
                         'data' => $aiData
                     ]);

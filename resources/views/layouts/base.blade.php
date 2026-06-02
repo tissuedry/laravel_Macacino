@@ -20,6 +20,63 @@
         #welcome-text .line2 { display: block; font-size: clamp(28px, 6vw, 52px); color: #fff; text-shadow: 0 2px 40px rgba(255,220,140,0.35); }
         #welcome-text .line3 { display: block; font-size: clamp(22px, 4vw, 34px); color: rgba(255,200,180,0.90); margin-top: 4px; }
         @keyframes welcome-rise { from { transform: translateY(18px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* ========================================================
+           PENGATURAN OVERRIDE AMAN & ANTI-CLIPPING (FINAL)
+           ======================================================== */
+        
+        /* 1. Hilangkan total fisik sidebar kiri saat collapsed */
+        #highlights-sidebar.collapsed,
+        .highlights-sidebar.collapsed {
+            display: none !important;
+            width: 0 !important;
+            min-width: 0 !important;
+            max-width: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border: none !important;
+            background: transparent !important;
+        }
+
+        /* 2. Hilangkan total fisik sidebar kanan saat hidden */
+        #ai-panel[hidden],
+        .ai-panel[hidden] {
+            display: none !important;
+            width: 0 !important;
+            min-width: 0 !important;
+            max-width: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border: none !important;
+            background: transparent !important;
+        }
+
+        /* 3. Sembunyikan batang resizer pembatas bawaan sidebar jika collapsed */
+        #highlights-sidebar.collapsed + #left-resizer,
+        #left-resizer.hidden,
+        .resizer.hidden {
+            display: none !important;
+            width: 0 !important;
+        }
+
+        /* 4. REVISI UTAMA: Mengatur ulang flex container agar dokumen mulai dari atas sejati */
+        .pdf-area {
+            flex: 1 !important;
+            display: flex !important;
+            flex-direction: row !important;
+            justify-content: center !important; /* Menjaga kertas tetap di tengah secara horizontal */
+            align-items: flex-start !important; /* 🌟 KUNCI: Paksa dokumen mulai dari atas, cegah teks terpotong! */
+            overflow-y: auto !important; /* Mengembalikan fungsi scroll bar dokumen yang hilang */
+            position: relative !important;
+            background: transparent !important; 
+            height: 100% !important;
+        }
+
+        /* 5. Mengembalikan kontrol penuh lebar kertas pada JavaScript Resizer */
+        .center-reader-wrapper {
+            margin: 0 auto !important; /* Memposisikan kertas selalu di tengah area kosong */
+            display: flex !important; /* Menjaga struktur internal resizer kertas bawaan aplikasi Anda */
+        }
     </style>
 </head>
 <body>

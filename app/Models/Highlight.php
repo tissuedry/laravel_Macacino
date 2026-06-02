@@ -22,7 +22,8 @@ class Highlight extends Model
         'ai_vocabulary',
         'ai_grammar',
         'ai_idiom_note',
-        'color'
+        'color',
+        'ai_details'
     ];
 
     // Array casting untuk memastikan ai_vocabulary terbaca sebagai JSON objek oleh database

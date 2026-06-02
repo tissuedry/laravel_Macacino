@@ -44,6 +44,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   const style = document.createElement('style');
   style.innerHTML = `mark::selection, span.temp-highlight::selection { background: transparent; }`;
   document.head.appendChild(style);
+
+// 🟢 LOGIKA TOGGLE SIDEBAR KIRI YANG BARU 🟢
+  const toggleLeftSidebarBtn = document.getElementById('toggle-left-sidebar-btn');
+  const highlightsSidebar = document.getElementById('highlights-sidebar');
+  const leftResizer = document.getElementById('left-resizer'); 
+
+  if (toggleLeftSidebarBtn && highlightsSidebar) {
+      toggleLeftSidebarBtn.addEventListener('click', () => {
+          // Gunakan toggle class 'hidden' milik Tailwind (berisi display: none !important)
+          highlightsSidebar.classList.toggle('hidden');
+          
+          // Sembunyikan juga resizer-nya agar tidak ada ruang "hantu"
+          if (leftResizer) {
+              leftResizer.classList.toggle('hidden');
+          }
+      });
+  }
+  // 🟢 SAMPAI SINI 🟢
 });
 
 // ── UTILITIES: Toast & Modal UI ────────────────────────────────
@@ -238,19 +256,37 @@ async function loadSidebarNotes(pageNum) {
         const safeSelectedText = encodeURIComponent(note.text_content || '');
         const safeExplanation  = encodeURIComponent(note.ai_explanation || '');
 
+        // 1. Ekstrak data JSON dengan aman (mencegah double-stringified dari database)
         let detailsObj = {};
         if (note.ai_details) {
-            try { detailsObj = typeof note.ai_details === 'string' ? JSON.parse(note.ai_details) : note.ai_details; } catch(e){}
+            try { 
+                let parsed = typeof note.ai_details === 'string' ? JSON.parse(note.ai_details) : note.ai_details; 
+                // Jaga-jaga jika ter-stringify dua kali oleh server
+                if (typeof parsed === 'string') parsed = JSON.parse(parsed);
+                detailsObj = parsed;
+            } catch(e) {
+                console.error("Gagal membaca ai_details:", e);
+            }
         }
+        
+        // 2. Siapkan masing-masing variabel sesuai nama kunci (key) di JSON
         const grammar = detailsObj.grammar || note.ai_grammar || null;
-        const idiomNote = detailsObj.idiom_note || note.ai_idiom_note || null;
         const collocations = detailsObj.collocations || [];
-        const nuance = detailsObj.nuance || null;
-        const tenseInfo = detailsObj.tense_info || null;
+        const idiomNote = detailsObj.idiom_note || note.ai_idiom_note || null;
         const tip = detailsObj.tip || null;
+        const nuance = detailsObj.nuance || null;
+        const tenseInfo = detailsObj.tense_info || null; // JSON key-nya menggunakan underscore
 
-        const moreDetailsHtml = generateMoreDetailsHtml(grammar, vocabulary, idiomNote, tip, note.text_content);
-
+        // 3. Masukkan ke lubang cetakan dengan URUTAN YANG SAMA PERSIS dengan definisi fungsi Anda
+        const moreDetailsHtml = generateMoreDetailsHtml(
+            grammar, 
+            collocations, 
+            idiomNote, 
+            tip, 
+            note.text_content, 
+            nuance, 
+            tenseInfo
+        );
         html += `
           <div class="sidebar-note-card ai-saved-note" id="note-card-${note.id}">
             <div class="snc-header">
@@ -446,17 +482,28 @@ async function loadDocument() {
     await renderPage(docData.last_page || 1);
   } catch (err) { if(pdfLoading) pdfLoading.innerHTML = '<p style="color:var(--danger);padding:24px;">Gagal memuat dokumen.</p>'; }
 }
+let pageNumPending = null;
 
 async function renderPage(pageNum) {
-  if (isRendering) return;
+  // Jika sistem sedang sibuk me-render, jangan abaikan klik, tapi antrekan halamannya
+  if (isRendering) {
+    pageNumPending = pageNum; 
+    return;
+  }
+  
   isRendering = true;
-  currentPage      = pageNum;
-  if(pageInput) pageInput.value  = pageNum;
-  if(prevBtn) prevBtn.disabled = pageNum <= 1;
-  if(nextBtn) nextBtn.disabled = pageNum >= totalPages;
+  currentPage = pageNum;
+  
+  if(pageInput) pageInput.value = pageNum;
+  if(prevBtn) prevBtn.disabled = false;
+  if(nextBtn) nextBtn.disabled = false;
+
+  // Memunculkan efek loading (opsional, sesuaikan dengan id loading di HTML Anda)
+  if(pdfLoading) pdfLoading.style.display = 'flex'; 
+  if(centerWrapper) centerWrapper.hidden = true; 
 
   try {
-    const page        = await pdfDoc.getPage(pageNum);
+    const page = await pdfDoc.getPage(pageNum);
     const textContent = await page.getTextContent();
     let textHTML = ''; let currentParagraph = ''; let lastY = null;
 
@@ -478,12 +525,25 @@ async function renderPage(pageNum) {
     
     if (currentParagraph) { textHTML += `<p>${currentParagraph}</p>`; }
     if(htmlContainer) htmlContainer.innerHTML = textHTML || '<p class="text-muted" style="text-align:center;">Halaman ini kosong.</p>';
-    if(pdfLoading) pdfLoading.style.display = 'none';
+    
+if(pdfLoading) pdfLoading.style.display = 'none';
     if(centerWrapper) centerWrapper.hidden = false; 
+    
+    // --- METODE SAPU BERSIH: RESET SEMUA KEMUNGKINAN SCROLLBAR KE ATAS ---
     const pdfAreaEl = document.getElementById('pdf-area');
     if(pdfAreaEl) pdfAreaEl.scrollTop = 0;
+    if(htmlContainer) htmlContainer.scrollTop = 0;
+    if(centerWrapper) centerWrapper.scrollTop = 0;
+    
+    // Reset jika scrollbar menempel pada window/body global browser
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    // ---------------------------------------------------------------------
 
-    await loadSidebarNotes(pageNum);
+    // Load sidebar tanpa "await" agar tidak mengunci tombol
+    loadSidebarNotes(pageNum);
+    
     if (document.body.classList.contains('focus-mode-active')) updateFocusModeText();
 
     const csrfToken = getCsrfToken();
@@ -492,7 +552,21 @@ async function renderPage(pageNum) {
         headers: csrfToken ? { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken } : { 'Content-Type': 'application/json' }, 
         body: JSON.stringify({ page: pageNum }) 
     }).catch(() => {});
-  } catch (err) { console.error('Render error:', err); } finally { isRendering = false; }
+    
+  } catch (err) { 
+    console.error('Render error:', err); 
+    if(pdfLoading) pdfLoading.style.display = 'none';
+  } finally { 
+    // 3. BUKA KUNCI DAN CEK ANTREAN
+    isRendering = false; 
+    
+    // Jika ada halaman yang mengantre saat proses tadi berlangsung, langsung eksekusi!
+    if (pageNumPending !== null) {
+      const renderNext = pageNumPending;
+      pageNumPending = null; 
+      renderPage(renderNext); 
+    }
+  }
 }
 
 function bindNav() {
@@ -640,6 +714,7 @@ document.addEventListener('DOMContentLoaded', () => {
       analyzeBtn.classList.add('loading-magic');
       applyHighlightMarker();
 
+      console.log("Teks yang dikirim:", selectedText);
       try {
         const csrfToken = getCsrfToken();
         const response = await fetch('/api/ai/explain', { 
@@ -732,19 +807,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
        
 
-          const saveNoteBtn = document.getElementById('save-ai-note-btn');
+const saveNoteBtn = document.getElementById('save-ai-note-btn');
           if (saveNoteBtn) saveNoteBtn.addEventListener('click', async () => {
             saveNoteBtn.innerHTML = '⏳ Menyimpan...'; saveNoteBtn.disabled = true;
             try {
               const csrfToken = getCsrfToken();
-                const res = await fetch('/api/highlights/ai-note', {
+              const res = await fetch('/api/highlights/ai-note', {
                 method: 'POST', 
                 headers: { 
                     'Content-Type': 'application/json', 
                     'Accept': 'application/json', // Tambahkan ini
                     'X-CSRF-TOKEN': csrfToken || '' 
                 },
-                body: JSON.stringify({ document_id: DOCUMENT_ID, page_number: currentPage, text_content: selectedText, ai_explanation: data.explanation || '', ai_translation: data.translation || '', color: currentHighlightColor, ai_details: JSON.stringify({ grammar: data.grammar, collocations: data.collocations, idiom_note: data.idiom_note, tip: data.tip, nuance: data.nuance, tense_info: data.tense_info })
+                body: JSON.stringify({ 
+                    document_id: DOCUMENT_ID, 
+                    page_number: currentPage, 
+                    text_content: selectedText, 
+                    ai_explanation: data.explanation || '', 
+                    ai_translation: data.translation || '', 
+                    color: currentHighlightColor, 
+                    ai_details: JSON.stringify({ 
+                        grammar: data.grammar, 
+                        collocations: data.collocations, 
+                        idiom_note: data.idiom_note, 
+                        tip: data.tip, 
+                        nuance: data.nuance, 
+                        tense_info: data.tense_info 
+                    })
+                })
+              }); // <-- FIX: Properly closed JSON.stringify and fetch
+
               if (res.ok) { 
                   saveNoteBtn.innerHTML = '✅ Tersimpan'; 
                   showToast('Catatan berhasil disimpan.', 'success');

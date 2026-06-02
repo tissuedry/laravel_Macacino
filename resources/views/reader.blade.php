@@ -4,6 +4,92 @@
 @section('head')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
+    
+  /* ========================================================
+     1. GLOBAL OVERRIDE FOR FULLSCREEN MODE (SOLUSI UTAMA)
+     ======================================================== */
+  /* Memaksa sidebar utama aplikasi (global) agar hilang total di page ini */
+  aside:not(.highlights-sidebar):not(.ai-panel),
+  .sidebar,
+  .main-sidebar,
+  .navigation-sidebar,
+  #sidebar {
+    display: none !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Memaksa pembungkus halaman utama layouts.base agar melebar penuh 100% */
+  main,
+  .main-content,
+  .content-wrapper,
+  #content {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  body {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* ========================================================
+     2. INNER LAYOUT READER & SIDEBAR INTERAL
+     ======================================================== */
+  .reader-body {
+    display: flex !important;
+    width: 100% !important;
+    height: calc(100vh - 65px) !important;
+    overflow: hidden !important;
+    position: relative;
+  }
+
+  /* Area Pembaca Tengah (pdf-area) bertindak sebagai area dinamis */
+  .pdf-area {
+    flex: 1 !important;
+    display: flex !important;
+    justify-content: center !important; /* Memaksa kertas berada di tengah sejati */
+    overflow-y: auto !important;
+    position: relative;
+  }
+
+  /* Kertas/Teks otomatis memposisikan diri di tengah sisa ruang tersebut */
+  .center-reader-wrapper {
+    margin: 0 auto !important; 
+    max-width: 850px !important;
+    width: 100% !important;
+    padding: 0 24px;
+    box-sizing: border-box;
+    transition: all 0.3s ease-in-out;
+  }
+
+  /* Pembasmi sisa ruang hantu jika sidebar internal ditutup */
+  .highlights-sidebar[hidden], 
+  .highlights-sidebar.hidden,
+  .ai-panel[hidden],
+  .ai-panel.hidden {
+    display: none !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+  }
+
+  #left-resizer.hidden,
+  #right-resizer.hidden {
+    display: none !important;
+  }
+
+  /* ========================================================
+     3. ORIGINAL STYLES (BAWAAN APLIKASI ANDA)
+     ======================================================== */
   #html-text-container.hide-highlights mark,
   #html-text-container.hide-highlights span.temp-highlight {
     background-color: transparent !important;
@@ -125,6 +211,10 @@
       <a href="/" class="back-btn" title="Kembali ke Library">
         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
       </a>
+
+      <button class="icon-btn" id="toggle-left-sidebar-btn" title="Tutup/Buka Reading Notes">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+      </button>
       <div class="topbar-doc-info">
         <h1 class="topbar-title" id="doc-title">Loading...</h1>
       </div>
