@@ -1,5 +1,5 @@
 @extends('layouts.base')
-@section('title', 'Macacino — Library')
+@section('title', 'Macacino | Library')
 
 @section('body')
 <div class="library-layout">

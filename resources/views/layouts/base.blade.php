@@ -60,23 +60,8 @@
         }
 
         /* 4. REVISI UTAMA: Mengatur ulang flex container agar dokumen mulai dari atas sejati */
-        .pdf-area {
-            flex: 1 !important;
-            display: flex !important;
-            flex-direction: row !important;
-            justify-content: center !important; /* Menjaga kertas tetap di tengah secara horizontal */
-            align-items: flex-start !important; /* 🌟 KUNCI: Paksa dokumen mulai dari atas, cegah teks terpotong! */
-            overflow-y: auto !important; /* Mengembalikan fungsi scroll bar dokumen yang hilang */
-            position: relative !important;
-            background: transparent !important; 
-            height: 100% !important;
-        }
 
-        /* 5. Mengembalikan kontrol penuh lebar kertas pada JavaScript Resizer */
-        .center-reader-wrapper {
-            margin: 0 auto !important; /* Memposisikan kertas selalu di tengah area kosong */
-            display: flex !important; /* Menjaga struktur internal resizer kertas bawaan aplikasi Anda */
-        }
+
     </style>
 </head>
 <body>

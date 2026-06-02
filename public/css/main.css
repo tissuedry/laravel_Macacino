@@ -783,17 +783,34 @@ input  { font-family: inherit; }
    ============================================================ */
 
 /* ── Area Luar PDF ─────────────────────────────────────────── */
+/* ── 🌟 KODE BARU: Area Luar Kontainer Utama Pembaca Teks ─────────────────── */
 .pdf-area {
-  flex: 1;
-  display: flex !important;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  overflow-y: auto;
-  padding: 60px 20px;
-  background: #F4EFE6;
+  flex: 1;                     /* Membuat area tengah elastis menghabiskan sisa ruang */
+  display: flex;               /* Menggunakan flexbox untuk menjajarkan lembar kertas */
+  flex-direction: column;      /* 🌟 KUNCI UTAMA: Kembalikan ke column agar margin auto pada kertas bekerja simetris */
+  align-items: center;         /* Menjaga kertas tetap berada di tengah secara horizontal */
+  justify-content: flex-start; /* Memaksa dokumen dimulai dari atas sejati agar teks tidak terpotong */
+  overflow-y: auto;            /* Mengaktifkan scroll bar vertikal jika teks novel sangat panjang */
+  overflow-x: hidden;          /* Mencegah teks meluber melingkar ke samping saat diperkecil */
   position: relative;
+  padding: 40px 20px;          /* Jarak aman atas bawah agar kertas terlihat elegan */
+  background: #F4EFE6;         /* Warna dasar hangat pelindung mata */
+  height: 100%;
+  min-width: 0;                /* 🌟 KUNCI FLEXBOX: Mengizinkan kontainer menciut saat sidebar kiri diperlebar */
 }
+
+/* Cari dan sesuaikan di public/css/main.css */
+.center-reader-wrapper {
+  position: relative;        /* Wajib agar resizer absolut bisa menempel di ujung */
+  display: flex;             /* Menjaga gagang resizer sejajar horizontal mengapit teks */
+  width: 850px;              
+  max-width: 96%;            
+  min-width: 400px;          
+  margin: 0 auto;            /* Menjaga posisi kertas otomatis di tengah sejati */
+  padding: 0;                /* 🌟 KUNCI: Setel ke 0 agar gagang benar-benar berada di ujung kanan-kiri kertas */
+  box-sizing: border-box;
+}
+
 
 .pdf-area::-webkit-scrollbar       { width: 6px; }
 .pdf-area::-webkit-scrollbar-track { background: transparent; }
@@ -833,16 +850,7 @@ input  { font-family: inherit; }
   40%           { transform: scale(1.1); opacity: 1; }
 }
 
-/* ── Bungkus Kertas / Dokumen ──────────────────────────────── */
-.center-reader-wrapper {
-  position: relative;
-  width: 850px; 
-  max-width: 96%; 
-  min-width: 400px; 
-  margin: 0 auto; 
-  display: block;
-}
-.center-reader-wrapper[hidden] { display: none !important; }
+
 
 /* Pastikan Canvas PDF menyesuaikan lebar wrapper */
 #pdf-canvas {
@@ -1817,21 +1825,21 @@ input  { font-family: inherit; }
    ============================================================ */
 
 .clean-text-reader {
-  width: 100% !important; 
-  max-width: none !important; 
-  margin: 0 !important;
-  padding: 60px 64px; 
+  width: 100%; 
+  max-width: 100%; 
+  box-sizing: border-box;
+  padding: 40px 48px; 
   background-color: #FFFFFF; 
   border-radius: 12px; 
   box-shadow: 0 8px 32px rgba(28, 25, 22, 0.08); 
-  
+
   font-family: var(--font-reading), 'Source Serif 4', Georgia, serif; 
   font-size: 19px; 
   line-height: 1.8; 
   color: #2A2621; 
-  
-  text-align: left !important; 
+  text-align: left; 
   word-wrap: break-word; 
+  overflow-wrap: break-word;
 }
 
 .clean-text-reader p {

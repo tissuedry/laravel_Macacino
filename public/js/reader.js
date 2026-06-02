@@ -113,6 +113,7 @@ function showConfirmModal(title, message, confirmText, onConfirm) {
 }
 
 // ── FUNGSI GENERATOR HTML MORE DETAILS ─────────────────────────
+// KODE FULL 1: Kembalikan fungsi generateMoreDetailsHtml
 function generateMoreDetailsHtml(grammar, collocations, idiomNote, tip, selectedText, nuance, tenseInfo) {
     // Collocations
     let collocHtml = '';
@@ -128,7 +129,7 @@ function generateMoreDetailsHtml(grammar, collocations, idiomNote, tip, selected
     let nuanceHtml = '';
     if (nuance && nuance.trim()) {
         const nuanceLower = nuance.toLowerCase();
-        let nuanceColor = '#6c757d'; // default netral
+        let nuanceColor = '#6c757d'; 
         let nuanceEmoji = '⚪';
         if (nuanceLower.includes('negatif') || nuanceLower.includes('sarkas') || nuanceLower.includes('kasar')) {
             nuanceColor = '#dc3545'; nuanceEmoji = '🔴';
@@ -735,56 +736,60 @@ document.addEventListener('DOMContentLoaded', () => {
         if (response.ok && result.data) {
           const data = result.data;
           
-          const dynamicCardsHtml = generateMoreDetailsHtml(data.grammar, data.collocations, data.idiom_note, data.tip, selectedText, data.nuance, data.tense_info)
-          
-          let htmlContent = `
-            <div class="ai-stack">
-              <div class="ai-selected-text-box">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                  <span style="font-size:0.85em; color:var(--text-muted); font-weight:600;">Teks Terpilih:</span>
-                  <div style="display:flex; align-items:center; gap:8px;">
-                    <select id="tts-speed" style="font-size:0.8em; padding:2px 5px; border-radius:4px; border:1px solid var(--border); outline:none; background:var(--surface); color:var(--text-primary);"><option value="1.0">1.0x (Normal)</option><option value="0.8">0.8x (Lambat)</option><option value="0.5">0.5x (Sangat Lambat)</option></select>
-                    <div style="display:flex; gap:4px;">
-                        <button id="play-selected-us-btn" class="play-audio-btn" title="Dengarkan (US)">🇺🇸</button>
-                        <button id="play-selected-uk-btn" class="play-audio-btn" title="Dengarkan (UK)">🇬🇧</button>
-                    </div>
-                  </div>
+          // KODE FULL 2: Kembalikan tampilan Panel AI Kanan
+        const dynamicCardsHtml = generateMoreDetailsHtml(data.grammar, data.collocations, data.idiom_note, data.tip, selectedText, data.nuance, data.tense_info);
+                
+        let htmlContent = `
+        <div class="ai-stack">
+            <div class="ai-selected-text-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="font-size:0.85em; color:var(--text-muted); font-weight:600;">Teks Terpilih:</span>
+                <div style="display:flex; align-items:center; gap:8px;">
+                <select id="tts-speed" style="font-size:0.8em; padding:2px 5px; border-radius:4px; border:1px solid var(--border); outline:none; background:var(--surface); color:var(--text-primary);">
+                    <option value="1.0">1.0x (Normal)</option><option value="0.8">0.8x (Lambat)</option><option value="0.5">0.5x (Sangat Lambat)</option>
+                </select>
+                <div style="display:flex; gap:4px;">
+                    <button id="play-selected-us-btn" class="play-audio-btn" title="Dengarkan (US)">🇺🇸</button>
+                    <button id="play-selected-uk-btn" class="play-audio-btn" title="Dengarkan (UK)">🇬🇧</button>
                 </div>
-                <p style="margin:0; font-size:0.95em; line-height:1.5; color:var(--text-primary); font-style:italic;"><mark style="background:${currentHighlightColor}; border-radius:3px; color:#000; padding:2px 4px;">"${selectedText}"</mark></p>
-              </div>
-
-              <div style="margin-bottom:1.5rem; padding:0 5px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                  <h4 style="margin:0; color:var(--primary); font-size:1.1em;">🧠 English Explanation</h4>
-                  <div style="display:flex; gap:4px;">
-                      <button id="play-exp-us-btn" class="play-audio-btn" title="Dengarkan Penjelasan (US)">🇺🇸</button>
-                      <button id="play-exp-uk-btn" class="play-audio-btn" title="Dengarkan Penjelasan (UK)">🇬🇧</button>
-                  </div>
                 </div>
-                <p style="font-size:0.95em; line-height:1.6; color:var(--text-primary);">${data.explanation}</p>
-              </div>
+            </div>
+            <p style="margin:0; font-size:0.95em; line-height:1.5; color:var(--text-primary); font-style:italic;"><mark style="background:${currentHighlightColor}; border-radius:3px; color:#000; padding:2px 4px;">"${selectedText}"</mark></p>
+            </div>
 
-              <div id="unlock-gate" style="margin:0 0 12px 0; border:2px dashed var(--border,#dee2e6); border-radius:10px; padding:14px 16px; background:rgba(13,110,253,0.03); text-align:center;">
-                <p style="margin:0 0 10px 0; font-size:0.88em; color:var(--text-muted); line-height:1.4;">🔒 Baca dan pahami penjelasan di atas terlebih dahulu.</p>
-                <button id="unlock-btn" style="background:#0d6efd; color:#fff; border:none; border-radius:8px; padding:9px 22px; font-size:0.9em; font-weight:700; cursor:pointer;">✅ Saya Sudah Paham — Buka Terjemahan</button>
-              </div>
+            <div style="margin-bottom:1.5rem; padding:0 5px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <h4 style="margin:0; color:var(--primary); font-size:1.1em;">🧠 English Explanation</h4>
+                <div style="display:flex; gap:4px;">
+                    <button id="play-exp-us-btn" class="play-audio-btn" title="Dengarkan Penjelasan (US)">🇺🇸</button>
+                    <button id="play-exp-uk-btn" class="play-audio-btn" title="Dengarkan Penjelasan (UK)">🇬🇧</button>
+                </div>
+            </div>
+            <p style="font-size:0.95em; line-height:1.6; color:var(--text-primary);">${data.explanation}</p>
+            </div>
+
+            <div id="unlock-gate" style="margin:0 0 12px 0; border:2px dashed var(--border,#dee2e6); border-radius:10px; padding:14px 16px; background:rgba(13,110,253,0.03); text-align:center;">
+            <p style="margin:0 0 10px 0; font-size:0.88em; color:var(--text-muted); line-height:1.4;">🔒 Baca dan pahami penjelasan di atas terlebih dahulu.</p>
+            <button id="unlock-btn" style="background:#0d6efd; color:#fff; border:none; border-radius:8px; padding:9px 22px; font-size:0.9em; font-weight:700; cursor:pointer;">✅ Saya Sudah Paham — Buka Terjemahan</button>
+            </div>
 
             <div id="locked-section" style="pointer-events:none; opacity:0.35; filter:blur(2px); transition:all 0.4s ease;">
-                <details open style="margin-bottom: 12px;">
-                  <summary>🇮🇩 Indonesian Translation</summary>
-                  <div class="details-content"><p style="margin-bottom:0;">${data.translation}</p></div>
-                </details>
-                
-                <!-- Diubah menjadi dropdown persis seperti Indonesian Translation -->
-                <details style="margin-bottom: 12px;">
-                  <summary>✨ More details</summary>
-                  <div class="details-content" style="padding-top: 10px;">
-                    ${dynamicCardsHtml}
-                  </div>
-                </details>
-              </div>
+            <details open style="margin-bottom: 12px;">
+                <summary>🇮🇩 Indonesian Translation</summary>
+                <div class="details-content"><p style="margin-bottom:0;">${data.translation}</p></div>
+            </details>
+            
+            <details style="margin-bottom: 12px;">
+                <summary>✨ More details</summary>
+                <div class="details-content" style="padding-top: 10px;">
+                ${dynamicCardsHtml}
+                </div>
+            </details>
+            </div>
+
             <button id="save-ai-note-btn" class="save-note-btn"><span>📝</span> Simpan Catatan</button>
-          `;
+        </div>
+        `;
           
           aiPanelBody.innerHTML = htmlContent;
 
@@ -944,24 +949,45 @@ function initResizableSidebars() {
             startX = e.clientX;
             startWidth = targetElement.offsetWidth;
             resizer.classList.add('dragging');
+            
+            // 🌟 TAMBAHAN: Tandai body bahwa penyeretan sedang aktif
+            document.body.classList.add('is-dragging'); 
+            
             document.addEventListener('mousemove', doDrag);
             document.addEventListener('mouseup', stopDrag);
             document.body.style.userSelect = 'none'; 
         });
 
         function doDrag(e) {
+            // 🌟 TAMBAHAN: Hitung batas sisa layar agar tidak menabrak pada resolusi kecil
+            const maxAvailableWidth = window.innerWidth - 100; 
+
             if (isCenter) {
                 let diff = e.clientX - startX;
                 let newWidth = isLeftEdge ? startWidth - (diff * 2) : startWidth + (diff * 2);
-                if (newWidth >= 400 && newWidth <= 1200) { targetElement.style.width = `${newWidth}px`; }
+                
+                // Batasi lebar kertas dinamis (Min: 400px, Max: 1200px / sisa layar)
+                let maxW = Math.min(1200, maxAvailableWidth);
+                if (newWidth >= 400 && newWidth <= maxW) { 
+                    targetElement.style.width = `${newWidth}px`; 
+                }
             } else {
                 let newWidth = isLeftEdge ? startWidth + (e.clientX - startX) : startWidth - (e.clientX - startX);
-                if (newWidth > 200 && newWidth < 600) { targetElement.style.width = `${newWidth}px`; }
+                
+                // Batasi lebar sidebar agar tidak memakan lebih dari 40% ruang monitor
+                let maxSidebarW = Math.min(500, window.innerWidth * 0.4);
+                if (newWidth > 200 && newWidth < maxSidebarW) { 
+                    targetElement.style.width = `${newWidth}px`; 
+                }
             }
         }
 
         function stopDrag() {
             resizer.classList.remove('dragging');
+            
+            // 🌟 TAMBAHAN: Hapus penanda penyeretan dari body
+            document.body.classList.remove('is-dragging'); 
+            
             document.removeEventListener('mousemove', doDrag);
             document.removeEventListener('mouseup', stopDrag);
             document.body.style.userSelect = 'auto';

@@ -1,5 +1,5 @@
 @extends('layouts.base')
-@section('title', 'Daftar — Macacino')
+@section('title', 'Daftar | Macacino')
 
 @section('head')
 <style>

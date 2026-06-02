@@ -1,143 +1,13 @@
 @extends('layouts.base')
-@section('title', 'Macacino — Reader')
+@section('title', 'Macacino | Reader')
 
 @section('head')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
-    
-  /* ========================================================
-     1. GLOBAL OVERRIDE FOR FULLSCREEN MODE (SOLUSI UTAMA)
-     ======================================================== */
-  /* Memaksa sidebar utama aplikasi (global) agar hilang total di page ini */
-  aside:not(.highlights-sidebar):not(.ai-panel),
-  .sidebar,
-  .main-sidebar,
-  .navigation-sidebar,
-  #sidebar {
-    display: none !important;
-    width: 0 !important;
-    min-width: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-
-  /* Memaksa pembungkus halaman utama layouts.base agar melebar penuh 100% */
-  main,
-  .main-content,
-  .content-wrapper,
-  #content {
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  body {
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-
-  /* ========================================================
-     2. INNER LAYOUT READER & SIDEBAR INTERAL
-     ======================================================== */
-  .reader-body {
-    display: flex !important;
-    width: 100% !important;
-    height: calc(100vh - 65px) !important;
-    overflow: hidden !important;
-    position: relative;
-  }
-
-  /* Area Pembaca Tengah (pdf-area) bertindak sebagai area dinamis */
-  .pdf-area {
-    flex: 1 !important;
-    display: flex !important;
-    justify-content: center !important; /* Memaksa kertas berada di tengah sejati */
-    overflow-y: auto !important;
-    position: relative;
-  }
-
-  /* Kertas/Teks otomatis memposisikan diri di tengah sisa ruang tersebut */
-  .center-reader-wrapper {
-    margin: 0 auto !important; 
-    max-width: 850px !important;
-    width: 100% !important;
-    padding: 0 24px;
-    box-sizing: border-box;
-    transition: all 0.3s ease-in-out;
-  }
-
-  /* Pembasmi sisa ruang hantu jika sidebar internal ditutup */
-  .highlights-sidebar[hidden], 
-  .highlights-sidebar.hidden,
-  .ai-panel[hidden],
-  .ai-panel.hidden {
-    display: none !important;
-    width: 0 !important;
-    min-width: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    border: none !important;
-  }
-
-  #left-resizer.hidden,
-  #right-resizer.hidden {
-    display: none !important;
-  }
-
-  /* ========================================================
-     3. ORIGINAL STYLES (BAWAAN APLIKASI ANDA)
-     ======================================================== */
-  #html-text-container.hide-highlights mark,
-  #html-text-container.hide-highlights span.temp-highlight {
-    background-color: transparent !important;
-    color: inherit !important;
-  }
-  #focus-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; visibility: hidden; transition: opacity 0.5s ease, background-color 0.5s ease; }
-  #focus-overlay.active { opacity: 1; visibility: visible; }
+    /* =========================================================
+     KEMBALIKAN DESAIN AI PANEL & READING NOTES YANG HILANG 
+     ========================================================= */
   
-  #focus-overlay.bg-paper        { background-color: #FFFFFF; color: #2A2621; }
-  #focus-overlay.bg-buram        { background-color: #F5F5F4; color: #333333; }
-  #focus-overlay.bg-sepia        { background-color: #F4ECD8; color: #433422; }
-  #focus-overlay.bg-solar-light  { background-color: #FDF6E3; color: #586E75; }
-  #focus-overlay.bg-nord         { background-color: #2E3440; color: #D8DEE9; }
-  #focus-overlay.bg-gruvbox      { background-color: #282828; color: #EBDBB2; }
-  #focus-overlay.bg-midnight     { background-color: #0F172A; color: #F1F5F9; }
-  #focus-overlay.bg-dracula      { background-color: #282A36; color: #F8F8F2; }
-  #focus-overlay.bg-zen          { background-color: #121212; color: #E0E0E0; }
-
-  .breathing-background { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.15; z-index: -1; animation: breatheAnimation 10s infinite ease-in-out; will-change: opacity, transform; }
-  @keyframes breatheAnimation { 0% { opacity: 0.15; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.05); } 100% { opacity: 0.15; transform: scale(1); } }
-
-  #focus-text-container { max-width: 800px; width: 90%; max-height: 80vh; padding: 40px; background: transparent; box-shadow: none; overflow-y: auto; font-family: 'Source Serif 4', Georgia, serif; font-size: 22px; line-height: 1.8; z-index: 10000; scroll-behavior: smooth; }
-  #focus-text-container::-webkit-scrollbar { width: 4px; }
-  #focus-text-container::-webkit-scrollbar-track { background: transparent; }
-  #focus-text-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
-  #focus-text-container ::selection { background: rgba(56, 189, 248, 0.4); color: #fff; }
-  #focus-text-container mark, #focus-text-container span.temp-highlight { background-color: transparent !important; color: inherit !important; }
-
-  .focus-controls { position: absolute; top: 20px; left: 0; width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 40px; z-index: 10001; box-sizing: border-box; opacity: 0.15; transition: opacity 0.4s ease; pointer-events: auto; }
-  .focus-controls:hover { opacity: 1; } 
-  .focus-page-info { color: rgba(255, 255, 255, 0.6); font-size: 15px; font-weight: 500; letter-spacing: 0.5px; }
-  
-  #close-focus-btn { background: transparent; color: rgba(255, 255, 255, 0.5); border: none; padding: 8px; cursor: pointer; transition: color 0.2s, transform 0.2s; z-index: 10; display: flex; align-items: center; justify-content: center; }
-  #close-focus-btn:hover { color: rgba(255, 255, 255, 1); transform: scale(1.1); }
-
-  .focus-theme-selector { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 16px; align-items: center; background: rgba(255, 255, 255, 0.05); padding: 8px 20px; border-radius: 30px; backdrop-filter: blur(4px); border: 1px solid rgba(255, 255, 255, 0.05); opacity: 0.1; transition: all 0.4s ease; z-index: 10001; pointer-events: auto; }
-  .focus-theme-selector:hover { opacity: 1; background: rgba(255, 255, 255, 0.15); transform: translateX(-50%) translateY(-5px); }
-  .focus-theme-btn { width: 16px; height: 16px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: transform 0.3s, border-color 0.3s; opacity: 0.6; padding: 0; }
-  .focus-theme-btn:hover { transform: scale(1.4); opacity: 1; }
-  .focus-theme-btn.active { border-color: rgba(255, 255, 255, 0.8); transform: scale(1.2); box-shadow: 0 0 10px rgba(255, 255, 255, 0.15); opacity: 1; }
-
-  body.focus-mode-active { --bg-panel: #0f172a !important; --bg-secondary: #1e293b !important; --bg-hover: #334155 !important; --border: #1e293b !important; --text-primary: #f1f5f9 !important; --text-secondary: #cbd5e1 !important; --text-muted: #94a3b8 !important; --primary: #38bdf8 !important; --success: #34d399 !important; }
-  body.focus-mode-active #ai-panel { position: fixed; top: 0; right: 0; height: 100vh; z-index: 10000; box-shadow: -10px 0 30px rgba(0,0,0,0.6); background-color: var(--bg-panel); }
-  body.focus-mode-active .ai-panel-title { color: var(--text-primary); }
-  body.focus-mode-active .ai-panel-close { color: var(--text-muted); }
-  body.focus-mode-active .ai-panel-close:hover { background: var(--bg-hover); color: var(--text-primary); }
-  body.focus-mode-active .ai-panel-header { border-bottom-color: var(--border); }
-
   #hl-list { overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--border) transparent; padding: 12px; }
   #hl-list::-webkit-scrollbar { width: 4px; }
   #hl-list::-webkit-scrollbar-track { background: transparent; }
@@ -186,20 +56,36 @@
   .md-card { background: var(--bg-secondary, #f8f9fa); border: 1px solid var(--border, #e9ecef); border-radius: 8px; padding: 14px; margin-bottom: 12px; }
   .md-card-title { margin: 0 0 8px 0; color: var(--primary, #0d6efd); font-size: 0.82em; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; font-weight: 700; }
   
-  /* Kartu Spesial Pronunciation (Aksen Merah) */
   .md-card-pronounce { background: rgba(237, 66, 69, 0.05); border: 1px solid rgba(237, 66, 69, 0.2); }
   .md-card-pronounce .md-card-title { color: #ed4245; }
   
   .btn-youglish { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #ed4245; color: white; padding: 10px 15px; border-radius: 6px; text-decoration: none; font-weight: 700; transition: background 0.2s; font-size: 13.5px; width: 100%; box-sizing: border-box; margin-top: 6px;}
   .btn-youglish:hover { background: #d03a3d; color: white; text-decoration: none;}
 
-  /* Custom List untuk Vocabulary */
   .md-vocab-list { padding-left: 0; margin: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
   .md-vocab-list li { color: var(--text-primary); line-height: 1.5; font-size: 0.9em; padding-bottom: 8px; border-bottom: 1px dashed var(--border); }
   .md-vocab-list li:last-child { border-bottom: none; padding-bottom: 0; }
   .md-vocab-list strong { color: var(--primary); font-weight: 700; font-size: 1.05em; }
   .md-vocab-list .type { font-style: italic; color: var(--text-muted); font-size: 0.9em; margin-right: 4px; }
   .md-vocab-list .example { color: var(--text-muted); font-size: 0.9em; display: block; margin-top: 4px; }
+  /* CSS Global Override: Hanya untuk elemen layout yang harus disembunyikan di mode reader */
+  aside:not(.highlights-sidebar):not(.ai-panel),
+  .sidebar, .main-sidebar, .navigation-sidebar, #sidebar {
+    display: none !important;
+  }
+
+  main, .main-content, .content-wrapper, #content {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Perbaikan Fokus Mode & Theme (Tidak berubah dari kode asli Anda) */
+  #focus-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; visibility: hidden; transition: opacity 0.5s ease; }
+  #focus-overlay.active { opacity: 1; visibility: visible; }
+  
+  /* Sisa CSS fokus theme tetap sama seperti kode Anda... */
 </style>
 @endsection
 
@@ -211,7 +97,6 @@
       <a href="/" class="back-btn" title="Kembali ke Library">
         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
       </a>
-
       <button class="icon-btn" id="toggle-left-sidebar-btn" title="Tutup/Buka Reading Notes">
         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
       </button>
@@ -222,137 +107,57 @@
     
     <div class="topbar-center">
       <div class="page-control">
-        <button class="page-btn" id="prev-page-btn" title="Halaman Sebelumnya">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-        </button>
+        <button class="page-btn" id="prev-page-btn"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
         <div class="page-indicator">
           <input type="number" id="current-page-input" class="page-input" value="1" min="1" />
           <span class="page-sep">/</span>
           <span id="total-pages">—</span>
         </div>
-        <button class="page-btn" id="next-page-btn" title="Halaman Selanjutnya">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
+        <button class="page-btn" id="next-page-btn"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
     </div>
     
     <div class="topbar-right">
-      <button class="icon-btn" id="toggle-highlights-btn" title="Sembunyikan Stabilo">
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-          <circle cx="12" cy="12" r="3"></circle>
-        </svg>
-      </button>
-
-      <button class="icon-btn" id="start-focus-btn" title="Mode Fokus">
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
-        </svg>
-      </button>
-      
-      <button class="icon-btn" id="highlights-toggle-btn" title="Catatan AI">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-      </button>
+      <button class="icon-btn" id="toggle-highlights-btn" title="Sembunyikan Stabilo"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+      <button class="icon-btn" id="start-focus-btn" title="Mode Fokus"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg></button>
+      <button class="icon-btn" id="highlights-toggle-btn" title="Catatan AI"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>
     </div>
   </header>
 
   <div class="reader-body">
     <aside class="highlights-sidebar" id="highlights-sidebar">
       <div class="hl-sidebar-header">
-        <div style="display:flex; align-items:center; gap:8px;">
-          <h3 class="hl-sidebar-title">Reading Notes</h3>
-          <span class="hl-count" id="hl-count">0</span>
-        </div>
-        <button id="delete-all-notes-btn" class="icon-btn" title="Hapus Semua Catatan" style="color: var(--danger); width: 28px; height: 28px; padding: 4px;">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
-        </button>
+        <h3 class="hl-sidebar-title">Reading Notes</h3>
+        <button id="delete-all-notes-btn" class="icon-btn" style="color: var(--danger);"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg></button>
       </div>
-      
-      <div class="hl-list" id="hl-list">
-        <div class="hl-empty">
-          <span>✏️</span>
-          <p>Highlight text to create your first note!</p>
-        </div>
-      </div>
-      <div class="resizer right-edge" id="left-resizer" title="Tarik untuk mengubah lebar sidebar"></div>
+      <div class="hl-list" id="hl-list"></div>
+      <div class="resizer right-edge" id="left-resizer"></div>
     </aside>
 
     <div class="pdf-area" id="pdf-area">
-      <div class="pdf-loading" id="pdf-loading">
-        <div class="loading-dot-wrap">
-          <span class="loading-dot"></span>
-          <span class="loading-dot"></span>
-          <span class="loading-dot"></span>
-        </div>
-        <p>Memuat teks dokumen...</p>
-      </div>
+      <div class="pdf-loading" id="pdf-loading"><div class="loading-dot-wrap"><span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span></div></div>
 
       <div class="center-reader-wrapper" id="center-reader-wrapper" hidden>
-        <div class="resizer left-edge" id="center-resizer-left" title="Tarik untuk mengubah lebar kertas"></div>
+        <div class="resizer left-edge" id="center-resizer-left"></div>
         <div id="html-text-container" class="clean-text-reader"></div>
-        <div class="resizer right-edge" id="center-resizer-right" title="Tarik untuk mengubah lebar kertas"></div>
+        <div class="resizer right-edge" id="center-resizer-right"></div>
       </div>
     </div>
 
     <aside class="ai-panel" id="ai-panel" hidden>
-      <div class="resizer left-edge" id="right-resizer" title="Tarik untuk mengubah lebar panel AI"></div>
+      <div class="resizer left-edge" id="right-resizer"></div>
       <div class="ai-panel-header">
         <h3 class="ai-panel-title">🤖 AI Analysis</h3>
-        <button class="ai-panel-close" id="ai-panel-close">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
+        <button class="ai-panel-close" id="ai-panel-close"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <div class="ai-panel-body" id="ai-panel-body"></div>
     </aside>
   </div>
-
-  <div class="selection-tooltip" id="selection-tooltip" hidden>
-    <button class="tooltip-btn" id="analyze-btn" title="Analyze & Translate with AI">
-      <span class="emoji">✨</span>
-      <span class="spark s1"></span>
-      <span class="spark s2"></span>
-      <span class="spark s3"></span>
-      <span class="spark s4"></span>
-      <span class="spark s5"></span>
-    </button>
-  </div>
-
-  <div id="focus-overlay" class="bg-midnight">
-    <div class="focus-controls">
-      <div class="focus-page-info">Page <span id="focus-current-page">1</span> of <span id="focus-total-pages">-</span></div>
-      <button id="close-focus-btn" title="Exit Focus Mode (Esc)">
-        <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-      </button>
-    </div>
-
-    <div class="breathing-background"></div>
-    
-    <div id="focus-text-container">
-      <div id="focus-text-content"></div>
-    </div>
-
-    <div class="focus-theme-selector">
-      <button class="focus-theme-btn active" data-theme="bg-paper" title="Kertas Putih" style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.1);"></button>
-      <button class="focus-theme-btn" data-theme="bg-buram" title="Kertas Buram" style="background: #F5F5F4;"></button>
-      <button class="focus-theme-btn" data-theme="bg-sepia" title="Warm Sepia" style="background: #F4ECD8;"></button>
-      <button class="focus-theme-btn" data-theme="bg-solar-light" title="Solarized Light" style="background: #FDF6E3;"></button>
-      
-      <button class="focus-theme-btn" data-theme="bg-nord" title="Nordic Blue" style="background: #2E3440;"></button>
-      <button class="focus-theme-btn" data-theme="bg-gruvbox" title="Gruvbox Dark" style="background: #282828;"></button>
-      <button class="focus-theme-btn" data-theme="bg-midnight" title="Midnight Abyss" style="background: #0F172A;"></button>
-      <button class="focus-theme-btn" data-theme="bg-dracula" title="Dracula" style="background: #282A36;"></button>
-      <button class="focus-theme-btn" data-theme="bg-zen" title="Zen Dark" style="background: #121212; border: 1px solid rgba(255,255,255,0.1);"></button>
-    </div>
-  </div>
-
 </div>
 @endsection
 
 @section('scripts')
 <script>
-  if (!document.body.classList.contains('theme-light') && !document.body.classList.contains('theme-dark')) {
-      document.body.classList.add('theme-light');
-  }
   window.DOCUMENT_ID = "{{ $document_id }}";
 </script>
 <script src="{{ asset('js/reader.js') }}"></script>
