@@ -46,7 +46,7 @@ class DocumentController extends Controller
             $file = $request->file('file');
             $title = $request->input('title') ?? $file->getClientOriginalName();
 
-            // Tetap menggunakan UUID hanya untuk menamai file fisiknya agar unik dan tidak tertimpa
+
             $fileId = (string) Str::uuid();
             $safeName = $fileId . '_' . str_replace(' ', '_', $file->getClientOriginalName());
 

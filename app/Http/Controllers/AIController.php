@@ -13,31 +13,31 @@ class AIController extends Controller
      */
     public function edgeTtsEndpoint(Request $request)
     {
-        // 1. Validasi teks yang dikirim dari JavaScript
+
         $request->validate([
             'text' => 'required|string',
             'accent' => 'nullable|string'
         ]);
 
         $text = $request->input('text');
-        $accent = $request->input('accent', 'american'); // Default ke aksen Amerika
+        $accent = $request->input('accent', 'american');
 
-        // 2. Tentukan kode bahasa
+
         $langCode = ($accent === 'british') ? 'en-GB' : 'en-US';
 
-        // 3. Panggil API Text-to-Speech 
+
         $textEncoded = urlencode($text);
         $url = "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl={$langCode}&q={$textEncoded}";
 
         try {
-            // Ambil file audio (.mp3) dari URL
+
             $audioData = file_get_contents($url);
 
             if ($audioData === false) {
                 throw new \Exception("Gagal mengambil data audio dari server.");
             }
 
-            // 4. Kembalikan data tersebut sebagai file Audio ke Browser
+
             return response($audioData, 200)
                 ->header('Content-Type', 'audio/mpeg')
                 ->header('Cache-Control', 'no-cache');
@@ -55,14 +55,14 @@ class AIController extends Controller
      */
     public function explainText(Request $request)
     {
-        // 1. Validasi input dari frontend (Menerima kata dan kalimat konteks)
+
         $request->validate([
             'text' => 'required|string|max:1000',
             'context' => 'nullable|string|max:2000'
         ]);
 
         $text = $request->input('text');
-        $context = $request->input('context', 'Tidak ada konteks spesifik.'); // Fallback jika context kosong
+        $context = $request->input('context', 'Tidak ada konteks spesifik.');
         $apiKey = env('GROQ_API_KEY');
 
         if (!$apiKey) {
@@ -71,7 +71,7 @@ class AIController extends Controller
             ], 500);
         }
 
-        // 2. Prompt instruksi: Penegasan HANYA menerjemahkan kata yang disorot
+
 $systemPrompt = "You are an expert English teacher helping an Indonesian student. 
                 The user will provide a 'Target Text' (which could be a single word, a phrase, or a full sentence) and a 'Context Sentence'.
                 
@@ -96,7 +96,7 @@ $systemPrompt = "You are an expert English teacher helping an Indonesian student
         $userPrompt = "Target Text: \"{$text}\"\nContext Sentence: \"{$context}\"";
 
         try {
-            // 3. Panggil API Groq dengan Llama 3
+
             $response = Http::withoutVerifying() 
                 ->withToken($apiKey)
                 ->timeout(15) 
