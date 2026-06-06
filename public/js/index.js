@@ -1,15 +1,10 @@
-/* ============================================================
-   READFOLIO — index.js
-   Library page: list, upload, delete documents
-   ============================================================ */
-
 'use strict';
 
-// ── State ─────────────────────────────────────────────────────
+// State
 let allDocuments = [];
 let selectedFile = null;
 
-// ── DOM refs ──────────────────────────────────────────────────
+// DOM refs 
 const uploadModal    = document.getElementById('upload-modal');
 const dropZone       = document.getElementById('drop-zone');
 const fileInput      = document.getElementById('file-input');
@@ -25,7 +20,7 @@ const docGrid        = document.getElementById('doc-grid');
 const emptyState     = document.getElementById('empty-state');
 const searchInput    = document.getElementById('search-input');
 
-// ── Init ──────────────────────────────────────────────────────
+// Init
 document.addEventListener('DOMContentLoaded', () => {
   loadDocuments();
   bindUploadModal();
@@ -33,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
   bindDeleteDocument();
 });
 
-// ── Load Documents ────────────────────────────────────────────
+// Load Documents 
 async function loadDocuments() {
   try {
     const res = await api.get('/api/documents/');
@@ -122,7 +117,7 @@ function renderDocuments(docs) {
   });
 }
 
-// ── Search ────────────────────────────────────────────────────
+// Search
 function bindSearch() {
   if (!searchInput) return;
   searchInput.addEventListener('input', debounce(() => {
@@ -134,7 +129,7 @@ function bindSearch() {
   }, 250));
 }
 
-// ── Upload Modal ──────────────────────────────────────────────
+// Upload Modal 
 function bindUploadModal() {
   const uploadBtn = document.getElementById('upload-btn');
   const modalCloseBtn = document.getElementById('modal-close-btn');

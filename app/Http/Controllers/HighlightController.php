@@ -54,14 +54,14 @@ class HighlightController extends Controller
                 'text_content' => 'required|string',
             ]);
 
-            // Ambil string JSON utuh dari request
+
             $aiDetailsStr = $request->input('ai_details');
-            
+
             $aiGrammar = null;
             $aiVocabulary = [];
             $aiIdiomNote = null;
 
-            // Ekstrak beberapa data spesifik (opsional, jika Anda masih butuh kolom terpisah di DB)
+
             if ($aiDetailsStr) {
                 $details = json_decode($aiDetailsStr, true);
                 $aiGrammar = $details['grammar'] ?? null;
@@ -79,15 +79,15 @@ class HighlightController extends Controller
                 'position_height' => 0.0,
                 'ai_explanation' => $request->input('ai_explanation'),
                 'ai_translation' => $request->input('ai_translation'),
-                
-                // Simpan data pecahan lama
+
+
                 'ai_grammar' => $aiGrammar,
-                'ai_vocabulary' => $aiVocabulary, 
+                'ai_vocabulary' => $aiVocabulary,
                 'ai_idiom_note' => $aiIdiomNote,
-                
-                // ✅ TAMBAHKAN BARIS INI: Simpan JSON utuh ke kolom ai_details
+
+
                 'ai_details' => $aiDetailsStr,
-                
+
                 'color' => $request->input('color', 'blue'),
             ]);
 
