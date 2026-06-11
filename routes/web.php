@@ -49,20 +49,64 @@ Route::middleware('auth')->group(function () {
         $userId = Auth::id();
         $docs = Document::where('user_id', $userId)->get();
         
-        $streak_days = $docs->count();
-        $finished_books = $docs->where('last_page', '>=', 'total_pages')->where('total_pages', '>', 0)->count();
         $total_words = Highlight::whereHas('document', function($q) use($userId) { 
             $q->where('user_id', $userId); 
         })->count();
+
+        $finished_books = $docs->where('last_page', '>=', 'total_pages')->where('total_pages', '>', 0)->count();
+
+        // 1. Hitung Streak Belajar Asli (Consecutive Days dari Highlights / Read Activity)
+        $highlightDates = Highlight::whereHas('document', function($q) use($userId) {
+                $q->where('user_id', $userId);
+            })
+            ->selectRaw('DATE(created_at) as date')
+            ->pluck('date')
+            ->map(fn($d) => \Carbon\Carbon::parse($d)->toDateString());
+
+        $readDates = Document::where('user_id', $userId)
+            ->whereNotNull('last_read_at')
+            ->selectRaw('DATE(last_read_at) as date')
+            ->pluck('date')
+            ->map(fn($d) => \Carbon\Carbon::parse($d)->toDateString());
+
+        $allDates = $highlightDates->merge($readDates)->unique()->sortDesc()->values();
+
+        $streak_days = 0;
+        if ($allDates->isNotEmpty()) {
+            $today = \Carbon\Carbon::today()->toDateString();
+            $yesterday = \Carbon\Carbon::yesterday()->toDateString();
+            
+            $currentDate = null;
+            if ($allDates->contains($today)) {
+                $currentDate = \Carbon\Carbon::today();
+            } elseif ($allDates->contains($yesterday)) {
+                $currentDate = \Carbon\Carbon::yesterday();
+            }
+            
+            if ($currentDate) {
+                while ($allDates->contains($currentDate->toDateString())) {
+                    $streak_days++;
+                    $currentDate->subDay();
+                }
+            }
+        }
+
+        // 2. Hitung Distribusi Catatan per Buku
+        $books_with_notes = Document::where('user_id', $userId)
+            ->withCount('highlights')
+            ->get()
+            ->filter(function($doc) {
+                return $doc->highlights_count > 0;
+            })
+            ->values();
 
         $doc_titles = json_encode($docs->pluck('title')->toArray());
         $doc_progress = json_encode($docs->map(function($doc) {
             return $doc->total_pages > 0 ? round(($doc->last_page / $doc->total_pages) * 100) : 0;
         })->toArray());
 
-        // Dummy data untuk chart distribusi (Bisa dikembangkan nanti sesuai jenis AI Vocabulary)
-        $vocab_titles = json_encode(['Vocabulary', 'Grammar', 'Idioms']);
-        $vocab_counts = json_encode([$total_words, ceil($total_words/3), ceil($total_words/5)]);
+        $vocab_titles = json_encode($books_with_notes->pluck('title')->toArray());
+        $vocab_counts = json_encode($books_with_notes->pluck('highlights_count')->toArray());
 
         return view('stats', compact('streak_days', 'total_words', 'finished_books', 'doc_titles', 'doc_progress', 'vocab_titles', 'vocab_counts'));
     });

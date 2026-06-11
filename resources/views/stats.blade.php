@@ -4,8 +4,34 @@
 @section('head')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-  .chart-container { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-sm); }
-  .chart-title { font-family: var(--font-heading); font-size: 16px; margin-bottom: 20px; color: var(--text-primary); text-align: center; }
+  .chart-container { 
+      background: var(--surface); 
+      border: 1px solid var(--border); 
+      border-radius: var(--radius-xl); 
+      padding: 24px; 
+      box-shadow: 0 4px 20px rgba(0,0,0,0.03); 
+      transition: transform 0.2s ease, box-shadow 0.2s ease; 
+  }
+  .chart-container:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.06);
+  }
+  .chart-title { 
+      font-family: var(--font-heading); 
+      font-size: 16px; 
+      margin-bottom: 20px; 
+      color: var(--text-primary); 
+      text-align: center; 
+      font-weight: 600;
+  }
+  .doc-card {
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+  }
+  .doc-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.08) !important;
+      border-color: var(--primary) !important;
+  }
 </style>
 @endsection
 
@@ -22,17 +48,17 @@
     </header>
 
     <div class="doc-grid" style="grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px;">
-      <div class="doc-card" style="text-align: center; padding: 30px 20px;">
+      <div class="doc-card" style="text-align: center; padding: 30px 20px; cursor: default;">
         <div style="font-size: 40px; margin-bottom: 10px;">🔥</div>
-        <h2 style="font-size: 28px; color: var(--accent);">{{ $streak_days ?? 0 }} Books</h2>
-        <p class="text-muted" style="font-size: 13px;">Previously accessed/read</p>
+        <h2 style="font-size: 28px; color: var(--accent);">{{ $streak_days ?? 0 }} {{ Str::plural('Day', $streak_days) }}</h2>
+        <p class="text-muted" style="font-size: 13px;">Consecutive study streak</p>
       </div>
-      <div class="doc-card" style="text-align: center; padding: 30px 20px;">
+      <div class="doc-card" style="text-align: center; padding: 30px 20px; cursor: default;">
         <div style="font-size: 40px; margin-bottom: 10px;">📝</div>
-        <h2 style="font-size: 28px; color: var(--primary);">{{ $total_words ?? 0 }} Notes</h2>
-        <p class="text-muted" style="font-size: 13px;">Saved texts/sentences</p>
+        <h2 style="font-size: 28px; color: var(--primary);">{{ $total_words ?? 0 }} {{ Str::plural('Note', $total_words) }}</h2>
+        <p class="text-muted" style="font-size: 13px;">Saved highlights & AI notes</p>
       </div>
-      <div class="doc-card" style="text-align: center; padding: 30px 20px;">
+      <div class="doc-card" style="text-align: center; padding: 30px 20px; cursor: default;">
         <div style="font-size: 40px; margin-bottom: 10px;">🏆</div>
         <h2 style="font-size: 28px; color: var(--success);">{{ $finished_books ?? 0 }} Completed</h2>
         <p class="text-muted" style="font-size: 13px;">Books you have finished</p>
@@ -45,7 +71,7 @@
             <canvas id="progressChart" height="200"></canvas>
         </div>
         <div class="chart-container">
-            <h3 class="chart-title">📝 Notes Distribution</h3>
+            <h3 class="chart-title">📚 Notes per Book</h3>
             <canvas id="vocabChart" height="250"></canvas>
         </div>
     </div>
@@ -60,18 +86,28 @@
     const vocabTitles = {!! isset($vocab_titles) ? $vocab_titles : '[]' !!};
     const vocabCounts = {!! isset($vocab_counts) ? $vocab_counts : '[]' !!};
 
-    const chartColors = [
-        'rgba(74, 124, 89, 0.7)',
-        'rgba(181, 114, 42, 0.7)',
-        'rgba(166, 64, 64, 0.7)',
-        'rgba(100, 160, 220, 0.7)',
-        'rgba(155, 145, 138, 0.7)',
-        'rgba(142, 68, 173, 0.7)',
-        'rgba(230, 126, 34, 0.7)'
-    ];
-    const chartBorders = chartColors.map(color => color.replace('0.7', '1'));
-
     const ctxProgress = document.getElementById('progressChart').getContext('2d');
+    
+    // Palet warna premium untuk masing-masing bar agar warnanya berbeda tiap buku
+    const barColors = [
+        'rgba(52, 211, 153, 0.75)', // Emerald
+        'rgba(14, 165, 233, 0.75)',  // Sky Blue
+        'rgba(245, 158, 11, 0.75)',  // Amber
+        'rgba(139, 92, 246, 0.75)',  // Purple
+        'rgba(239, 68, 68, 0.75)',   // Rose
+        'rgba(236, 72, 153, 0.75)',  // Pink
+        'rgba(20, 184, 166, 0.75)'   // Teal
+    ];
+    const barBorders = [
+        'rgba(52, 211, 153, 1)',
+        'rgba(14, 165, 233, 1)',
+        'rgba(245, 158, 11, 1)',
+        'rgba(139, 92, 246, 1)',
+        'rgba(239, 68, 68, 1)',
+        'rgba(236, 72, 153, 1)',
+        'rgba(20, 184, 166, 1)'
+    ];
+
     new Chart(ctxProgress, {
         type: 'bar',
         data: {
@@ -79,34 +115,74 @@
             datasets: [{
                 label: 'Completion (%)',
                 data: docProgress.length > 0 ? docProgress : [0],
-                backgroundColor: chartColors,
-                borderColor: chartBorders,
-                borderWidth: 1,
-                borderRadius: 4
+                backgroundColor: barColors,
+                borderColor: barBorders,
+                borderWidth: 1.5,
+                borderRadius: 6
             }]
         },
         options: {
             responsive: true,
-            plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true, max: 100 } }
+            plugins: { 
+                legend: { display: false } 
+            },
+            scales: { 
+                y: { 
+                    beginAtZero: true, 
+                    min: 0, 
+                    max: 100,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.04)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
         }
     });
 
     const ctxVocab = document.getElementById('vocabChart').getContext('2d');
+    
+    // Warna premium untuk sebaran buku (7 warna berputar)
+    const vocabColors = [
+        'rgba(52, 211, 153, 0.85)', // Emerald
+        'rgba(14, 165, 233, 0.85)',  // Sky Blue
+        'rgba(245, 158, 11, 0.85)',  // Amber
+        'rgba(139, 92, 246, 0.85)',  // Purple
+        'rgba(239, 68, 68, 0.85)',   // Rose
+        'rgba(236, 72, 153, 0.85)',  // Pink
+        'rgba(20, 184, 166, 0.85)'   // Teal
+    ];
+
+    // Cek jika datanya kosong total
+    const totalNotes = vocabCounts.reduce((a, b) => a + b, 0);
+
     new Chart(ctxVocab, {
         type: 'doughnut',
         data: {
-            labels: vocabTitles.length > 0 ? vocabTitles : ['No notes yet'],
+            labels: totalNotes > 0 ? vocabTitles : ['No notes yet'],
             datasets: [{
-                data: vocabCounts.length > 0 ? vocabCounts : [1],
-                backgroundColor: chartColors,
+                data: totalNotes > 0 ? vocabCounts : [1],
+                backgroundColor: totalNotes > 0 ? vocabColors : ['rgba(155, 145, 138, 0.2)'],
                 borderWidth: 0
             }]
         },
         options: {
             responsive: true,
-            cutout: '65%',
-            plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } }
+            cutout: '72%',
+            plugins: { 
+                legend: { 
+                    position: 'bottom', 
+                    labels: { 
+                        boxWidth: 12, 
+                        font: { size: 12, weight: '500' },
+                        color: 'var(--text-secondary)'
+                    } 
+                } 
+            }
         }
     });
 </script>

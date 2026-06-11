@@ -81,11 +81,55 @@
     max-width: 100% !important;
   }
 
-  /* Perbaikan Fokus Mode & Theme (Tidak berubah dari kode asli Anda) */
-  #focus-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; visibility: hidden; transition: opacity 0.5s ease; }
+  #html-text-container.hide-highlights mark,
+  #html-text-container.hide-highlights span.temp-highlight {
+    background-color: transparent !important;
+    color: inherit !important;
+  }
+
+  /* Perbaikan Fokus Mode & Theme */
+  #focus-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; visibility: hidden; transition: opacity 0.5s ease, background-color 0.5s ease; }
   #focus-overlay.active { opacity: 1; visibility: visible; }
   
-  /* Sisa CSS fokus theme tetap sama seperti kode Anda... */
+  #focus-overlay.bg-paper        { background-color: #FFFFFF; color: #2A2621; }
+  #focus-overlay.bg-buram        { background-color: #F5F5F4; color: #333333; }
+  #focus-overlay.bg-sepia        { background-color: #F4ECD8; color: #433422; }
+  #focus-overlay.bg-solar-light  { background-color: #FDF6E3; color: #586E75; }
+  #focus-overlay.bg-nord         { background-color: #2E3440; color: #D8DEE9; }
+  #focus-overlay.bg-gruvbox      { background-color: #282828; color: #EBDBB2; }
+  #focus-overlay.bg-midnight     { background-color: #0F172A; color: #F1F5F9; }
+  #focus-overlay.bg-dracula      { background-color: #282A36; color: #F8F8F2; }
+  #focus-overlay.bg-zen          { background-color: #121212; color: #E0E0E0; }
+
+  .breathing-background { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.15; z-index: -1; animation: breatheAnimation 10s infinite ease-in-out; will-change: opacity, transform; }
+  @keyframes breatheAnimation { 0% { opacity: 0.15; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.05); } 100% { opacity: 0.15; transform: scale(1); } }
+
+  #focus-text-container { max-width: 800px; width: 90%; max-height: 80vh; padding: 40px; background: transparent; box-shadow: none; overflow-y: auto; font-family: 'Source Serif 4', Georgia, serif; font-size: 22px; line-height: 1.8; z-index: 10000; scroll-behavior: smooth; }
+  #focus-text-container::-webkit-scrollbar { width: 4px; }
+  #focus-text-container::-webkit-scrollbar-track { background: transparent; }
+  #focus-text-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+  #focus-text-container ::selection { background: rgba(56, 189, 248, 0.4); color: #fff; }
+  #focus-text-container mark, #focus-text-container span.temp-highlight { background-color: transparent !important; color: inherit !important; }
+
+  .focus-controls { position: absolute; top: 20px; left: 0; width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 40px; z-index: 10001; box-sizing: border-box; opacity: 0.15; transition: opacity 0.4s ease; pointer-events: auto; }
+  .focus-controls:hover { opacity: 1; } 
+  .focus-page-info { color: rgba(255, 255, 255, 0.6); font-size: 15px; font-weight: 500; letter-spacing: 0.5px; }
+  
+  #close-focus-btn { background: transparent; color: rgba(255, 255, 255, 0.5); border: none; padding: 8px; cursor: pointer; transition: color 0.2s, transform 0.2s; z-index: 10; display: flex; align-items: center; justify-content: center; }
+  #close-focus-btn:hover { color: rgba(255, 255, 255, 1); transform: scale(1.1); }
+
+  .focus-theme-selector { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 16px; align-items: center; background: rgba(255, 255, 255, 0.05); padding: 8px 20px; border-radius: 30px; backdrop-filter: blur(4px); border: 1px solid rgba(255, 255, 255, 0.05); opacity: 0.1; transition: all 0.4s ease; z-index: 10001; pointer-events: auto; }
+  .focus-theme-selector:hover { opacity: 1; background: rgba(255, 255, 255, 0.15); transform: translateX(-50%) translateY(-5px); }
+  .focus-theme-btn { width: 16px; height: 16px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: transform 0.3s, border-color 0.3s; opacity: 0.6; padding: 0; }
+  .focus-theme-btn:hover { transform: scale(1.4); opacity: 1; }
+  .focus-theme-btn.active { border-color: rgba(255, 255, 255, 0.8); transform: scale(1.2); box-shadow: 0 0 10px rgba(255, 255, 255, 0.15); opacity: 1; }
+
+  body.focus-mode-active { --bg-panel: #0f172a !important; --bg-secondary: #1e293b !important; --bg-hover: #334155 !important; --border: #1e293b !important; --text-primary: #f1f5f9 !important; --text-secondary: #cbd5e1 !important; --text-muted: #94a3b8 !important; --primary: #38bdf8 !important; --success: #34d399 !important; --surface: #1e293b !important; }
+  body.focus-mode-active #ai-panel { position: fixed; top: 0; right: 0; height: 100vh; z-index: 10000; box-shadow: -10px 0 30px rgba(0,0,0,0.6); background-color: var(--bg-panel); }
+  body.focus-mode-active .ai-panel-title { color: var(--text-primary); }
+  body.focus-mode-active .ai-panel-close { color: var(--text-muted); }
+  body.focus-mode-active .ai-panel-close:hover { background: var(--bg-hover); color: var(--text-primary); }
+  body.focus-mode-active .ai-panel-header { border-bottom-color: var(--border); }
 </style>
 @endsection
 
@@ -153,11 +197,53 @@
       <div class="ai-panel-body" id="ai-panel-body"></div>
     </aside>
   </div>
+
+  <div class="selection-tooltip" id="selection-tooltip" hidden>
+    <button class="tooltip-btn" id="analyze-btn" title="Analyze & Translate with AI">
+      <span class="emoji">✨</span>
+      <span class="spark s1"></span>
+      <span class="spark s2"></span>
+      <span class="spark s3"></span>
+      <span class="spark s4"></span>
+      <span class="spark s5"></span>
+    </button>
+  </div>
+
+  <div id="focus-overlay" class="bg-midnight">
+    <div class="focus-controls">
+      <div class="focus-page-info">Page <span id="focus-current-page">1</span> of <span id="focus-total-pages">-</span></div>
+      <button id="close-focus-btn" title="Exit Focus Mode (Esc)">
+        <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+
+    <div class="breathing-background"></div>
+    
+    <div id="focus-text-container">
+      <div id="focus-text-content"></div>
+    </div>
+
+    <div class="focus-theme-selector">
+      <button class="focus-theme-btn active" data-theme="bg-paper" title="Kertas Putih" style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.1);"></button>
+      <button class="focus-theme-btn" data-theme="bg-buram" title="Kertas Buram" style="background: #F5F5F4;"></button>
+      <button class="focus-theme-btn" data-theme="bg-sepia" title="Warm Sepia" style="background: #F4ECD8;"></button>
+      <button class="focus-theme-btn" data-theme="bg-solar-light" title="Solarized Light" style="background: #FDF6E3;"></button>
+      
+      <button class="focus-theme-btn" data-theme="bg-nord" title="Nordic Blue" style="background: #2E3440;"></button>
+      <button class="focus-theme-btn" data-theme="bg-gruvbox" title="Gruvbox Dark" style="background: #282828;"></button>
+      <button class="focus-theme-btn" data-theme="bg-midnight" title="Midnight Abyss" style="background: #0F172A;"></button>
+      <button class="focus-theme-btn" data-theme="bg-dracula" title="Dracula" style="background: #282A36;"></button>
+      <button class="focus-theme-btn" data-theme="bg-zen" title="Zen Dark" style="background: #121212; border: 1px solid rgba(255,255,255,0.1);"></button>
+    </div>
+  </div>
 </div>
 @endsection
 
 @section('scripts')
 <script>
+  if (!document.body.classList.contains('theme-light') && !document.body.classList.contains('theme-dark')) {
+      document.body.classList.add('theme-light');
+  }
   window.DOCUMENT_ID = "{{ $document_id }}";
 </script>
 <script src="{{ asset('js/reader.js') }}"></script>

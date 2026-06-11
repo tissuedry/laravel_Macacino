@@ -13,7 +13,7 @@ let totalPages    = 0;
 let isRendering   = false;
 let docData       = null;
 let currentHighlightColor = 'rgba(255, 255, 0, 0.7)';
-let colorIndex = 0; 
+let currentPageNotes = [];
 
 const DOCUMENT_ID = window.DOCUMENT_ID;
 
@@ -341,10 +341,11 @@ async function loadSidebarNotes(pageNum) {
       });
 
       if (hlList) hlList.innerHTML = html;
-      const currentPageNotes = json.data.filter(n => n.page_number === currentPage);
+      currentPageNotes = json.data.filter(n => n.page_number === currentPage);
       applySavedHighlightsToText(currentPageNotes);
 
     } else {
+      currentPageNotes = [];
       if (hlCount) hlCount.textContent = '0';
       if (hlList) hlList.innerHTML = `<div class="hl-empty" style="text-align:center; padding:2rem 1rem; color:var(--text-muted);"><span style="font-size:2em;">📚</span><p>Belum ada catatan.</p></div>`;
     }
@@ -636,13 +637,37 @@ function applyHighlightMarker() {
   const span = document.createElement('span');
   span.className = 'temp-highlight';
 
-  const neonColors = [
-    'rgba(255, 255, 0, 0.7)', 'rgba(0, 255, 0, 0.5)', 'rgba(0, 255, 255, 0.6)',
-    'rgba(255, 0, 255, 0.5)', 'rgba(255, 153, 0, 0.7)', 'rgba(186, 85, 211, 0.6)'
+  const brightColors = [
+    'rgba(255, 255, 0, 0.7)',   // Yellow
+    'rgba(0, 255, 0, 0.5)',     // Green
+    'rgba(0, 255, 255, 0.6)',   // Cyan
+    'rgba(255, 0, 255, 0.5)',   // Magenta
+    'rgba(255, 153, 0, 0.7)',   // Orange
+    'rgba(186, 85, 211, 0.6)',  // Purple
+    'rgba(255, 51, 153, 0.7)',  // Hot Pink
+    'rgba(57, 255, 20, 0.6)',   // Lime
+    'rgba(14, 165, 233, 0.7)',  // Sky Blue
+    'rgba(244, 63, 94, 0.7)'    // Rose Red
   ];
 
-  currentHighlightColor = neonColors[colorIndex];
-  colorIndex = (colorIndex + 1) % neonColors.length;
+  // 1. Dapatkan warna highlight yang sudah dipakai di halaman ini (baik saved maupun temp)
+  const existingTemps = document.querySelectorAll('span.temp-highlight');
+  const tempColors = Array.from(existingTemps).map(s => s.style.backgroundColor.replace(/\s+/g, '').toLowerCase());
+
+  const savedColors = currentPageNotes.map(n => n.color ? n.color.replace(/\s+/g, '').toLowerCase() : '');
+
+  const usedColors = [...savedColors, ...tempColors];
+
+  // 2. Cari warna yang belum terpakai di halaman ini
+  const availableColors = brightColors.filter(c => !usedColors.includes(c.replace(/\s+/g, '').toLowerCase()));
+
+  // 3. Gunakan warna yang tersedia
+  if (availableColors.length > 0) {
+      currentHighlightColor = availableColors[0];
+  } else {
+      // Jika semua 10 warna sudah terpakai di halaman ini, pilih secara acak dari palet
+      currentHighlightColor = brightColors[Math.floor(Math.random() * brightColors.length)];
+  }
 
   span.style.backgroundColor = currentHighlightColor;
   span.style.color            = '#000';
