@@ -91,7 +91,7 @@ function showConfirmModal(title, message, confirmText, onConfirm) {
                 <p style="font-size: 14.5px; color: var(--text-secondary); line-height: 1.6; margin:0;">${message}</p>
             </div>
             <div class="modal-footer" style="background: var(--bg-warm); border-top: 1px solid var(--border); border-radius: 0 0 var(--radius-xl) var(--radius-xl);">
-                <button class="btn btn-ghost" onclick="document.getElementById('custom-confirm-modal').remove()">Batal</button>
+                <button class="btn btn-ghost" onclick="document.getElementById('custom-confirm-modal').remove()">Cancel</button>
                 <button class="btn btn-primary" id="confirm-modal-btn" style="background: var(--danger); border-color: var(--danger);">${confirmText}</button>
             </div>
         </div>
@@ -112,7 +112,7 @@ function generateMoreDetailsHtml(grammar, collocations, idiomNote, tip, selected
             `<span style="display:inline-block; background:var(--bg-warm); border:1px solid var(--border); border-radius:20px; padding:3px 10px; font-size:0.85em; margin:3px 2px; color:var(--text-primary);">${c}</span>`
         ).join('');
     } else {
-        collocHtml = '<span style="color:var(--text-muted); font-style:italic; font-size:0.9em;">Tidak ada kolokasi umum.</span>';
+        collocHtml = '<span style="color:var(--text-muted); font-style:italic; font-size:0.9em;">No common collocations.</span>';
     }
 
     let nuanceHtml = '';
@@ -120,23 +120,23 @@ function generateMoreDetailsHtml(grammar, collocations, idiomNote, tip, selected
         const nuanceLower = nuance.toLowerCase();
         let nuanceColor = '#6c757d'; 
         let nuanceEmoji = '⚪';
-        if (nuanceLower.includes('negatif') || nuanceLower.includes('sarkas') || nuanceLower.includes('kasar')) {
+        if (nuanceLower.includes('negatif') || nuanceLower.includes('sarkas') || nuanceLower.includes('kasar') || nuanceLower.includes('negative') || nuanceLower.includes('sarcastic') || nuanceLower.includes('rude') || nuanceLower.includes('informal') || nuanceLower.includes('slang')) {
             nuanceColor = '#dc3545'; nuanceEmoji = '🔴';
-        } else if (nuanceLower.includes('positif') || nuanceLower.includes('formal') || nuanceLower.includes('sopan')) {
+        } else if (nuanceLower.includes('positif') || nuanceLower.includes('formal') || nuanceLower.includes('sopan') || nuanceLower.includes('positive') || nuanceLower.includes('polite')) {
             nuanceColor = '#198754'; nuanceEmoji = '🟢';
-        } else if (nuanceLower.includes('netral')) {
+        } else if (nuanceLower.includes('netral') || nuanceLower.includes('neutral')) {
             nuanceColor = '#6c757d'; nuanceEmoji = '⚪';
         }
         nuanceHtml = `<span style="font-weight:700; color:${nuanceColor}; font-size:0.95em;">${nuanceEmoji} ${nuance}</span>`;
     } else {
-        nuanceHtml = '<span style="color:var(--text-muted); font-style:italic; font-size:0.9em;">Tidak ada nuansa khusus.</span>';
+        nuanceHtml = '<span style="color:var(--text-muted); font-style:italic; font-size:0.9em;">No specific nuance.</span>';
     }
 
     let tenseHtml = '';
     if (tenseInfo && tenseInfo.trim()) {
         tenseHtml = `<div style="font-size:0.9em; color:var(--text-secondary); line-height:1.7; white-space:pre-line;">${tenseInfo}</div>`;
     } else {
-        tenseHtml = '<span style="color:var(--text-muted); font-style:italic; font-size:0.9em;">Bukan kata kerja / tidak ada info tense.</span>';
+        tenseHtml = '<span style="color:var(--text-muted); font-style:italic; font-size:0.9em;">Not a verb / no tense info.</span>';
     }
 
     const encodedText = encodeURIComponent(selectedText || '');
@@ -144,15 +144,15 @@ function generateMoreDetailsHtml(grammar, collocations, idiomNote, tip, selected
     return `
         <div class="md-card md-card-pronounce">
             <h4 class="md-card-title">🗣️ Real-World Pronunciation</h4>
-            <p style="margin:0 0 10px 0; font-size:0.85em; color:var(--text-secondary); line-height:1.45;">Lihat cara penutur asli melafalkannya di ribuan video YouTube:</p>
+            <p style="margin:0 0 10px 0; font-size:0.85em; color:var(--text-secondary); line-height:1.45;">See how native speakers pronounce it in thousands of YouTube videos:</p>
             <a href="https://youglish.com/pronounce/${encodedText}/english" target="_blank" class="btn-youglish">
-                🚀 Cari di YouGlish
+                🚀 Search on YouGlish
             </a>
         </div>
         <div class="md-card">
             <h5 class="md-card-title">⚙️ Grammar Context</h5>
             <div style="font-size:0.9em; color:var(--text-secondary); line-height:1.5; white-space:pre-line;">
-                ${grammar ? grammar : '<span style="color:var(--text-muted); font-style:italic;">Tidak ada konteks grammar khusus.</span>'}
+                ${grammar ? grammar : '<span style="color:var(--text-muted); font-style:italic;">No specific grammar context.</span>'}
             </div>
         </div>
         <div class="md-card">
@@ -170,13 +170,13 @@ function generateMoreDetailsHtml(grammar, collocations, idiomNote, tip, selected
         <div class="md-card">
             <h5 class="md-card-title">🗣️ Idioms / Phrases</h5>
             <div style="font-size:0.9em; color:var(--text-secondary); line-height:1.5;">
-                ${idiomNote ? idiomNote : '<span style="color:var(--text-muted); font-style:italic;">Bukan merupakan ungkapan/idiom.</span>'}
+                ${idiomNote ? idiomNote : '<span style="color:var(--text-muted); font-style:italic;">Not an idiom/phrase.</span>'}
             </div>
         </div>
         <div class="md-card" style="border: 1px solid rgba(52, 211, 153, 0.3); background: rgba(52, 211, 153, 0.05);">
             <h5 class="md-card-title" style="color:var(--success);">💡 Pro Tip</h5>
             <div style="font-size:0.9em; line-height:1.5;">
-                ${tip ? `<span style="font-style:italic; color:var(--text-primary);">${tip}</span>` : '<span style="color:var(--text-muted); font-style:italic;">Tidak ada tips tambahan.</span>'}
+                ${tip ? `<span style="font-style:italic; color:var(--text-primary);">${tip}</span>` : '<span style="color:var(--text-muted); font-style:italic;">No additional tips.</span>'}
             </div>
         </div>
     `;
@@ -276,16 +276,16 @@ async function loadSidebarNotes(pageNum) {
             <div class="snc-header">
               <div class="snc-badge"><span>🧠</span> AI Analysis</div>
               <div class="snc-actions">
-                <span class="snc-page-badge">Hal. ${note.page_number}</span>
-                <button class="delete-note-btn snc-delete-btn" data-id="${note.id}" title="Hapus Catatan">🗑️</button>
+                <span class="snc-page-badge">Page ${note.page_number}</span>
+                <button class="delete-note-btn snc-delete-btn" data-id="${note.id}" title="Delete Note">🗑️</button>
               </div>
             </div>
 
             <div class="snc-selected-text" style="display:flex; justify-content:space-between; align-items:center;">
               <p style="margin:0;"><mark style="background:${badgeColor}; border-radius:3px; color:#000; padding:2px 4px;">"${note.text_content}"</mark></p>
               <div style="display:flex; gap:4px;">
-                  <button class="snc-audio-btn play-sidebar-btn" data-text="${safeSelectedText}" data-accent="american" title="Dengarkan (US)">🇺🇸</button>
-                  <button class="snc-audio-btn play-sidebar-btn" data-text="${safeSelectedText}" data-accent="british" title="Dengarkan (UK)">🇬🇧</button>
+                  <button class="snc-audio-btn play-sidebar-btn" data-text="${safeSelectedText}" data-accent="american" title="Listen (US)">🇺🇸</button>
+                  <button class="snc-audio-btn play-sidebar-btn" data-text="${safeSelectedText}" data-accent="british" title="Listen (UK)">🇬🇧</button>
               </div>
             </div>
 
@@ -296,25 +296,25 @@ async function loadSidebarNotes(pageNum) {
                   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                     <span style="font-weight:700; font-size:0.9em; color:var(--primary);">AI Explanation</span>
                     <div style="display:flex; gap:4px;">
-                        <button class="snc-audio-btn play-sidebar-btn" data-text="${safeExplanation}" data-accent="american" title="Penjelasan (US)">🇺🇸</button>
-                        <button class="snc-audio-btn play-sidebar-btn" data-text="${safeExplanation}" data-accent="british" title="Penjelasan (UK)">🇬🇧</button>
+                        <button class="snc-audio-btn play-sidebar-btn" data-text="${safeExplanation}" data-accent="american" title="Explanation (US)">🇺🇸</button>
+                        <button class="snc-audio-btn play-sidebar-btn" data-text="${safeExplanation}" data-accent="british" title="Explanation (UK)">🇬🇧</button>
                     </div>
                   </div>
                   <!-- Ukuran teks disamakan dengan sidebar kanan -->
-                  <p style="margin:0; font-size:0.95em; line-height:1.6; color:var(--text-primary);">${note.ai_explanation || 'Tidak ada penjelasan.'}</p>
+                  <p style="margin:0; font-size:0.95em; line-height:1.6; color:var(--text-primary);">${note.ai_explanation || 'No explanation available.'}</p>
                 </div>
               </details>
               <details class="snc-details">
-                <summary>🇮🇩 Terjemahan Indonesia <span class="snc-arrow">▼</span></summary>
+                <summary>🇮🇩 Indonesian Translation <span class="snc-arrow">▼</span></summary>
                 <div class="snc-details-body" style="padding: 12px 16px; box-sizing: border-box; word-wrap: break-word; width: 100%;">
                   <!-- Ukuran teks disamakan dengan sidebar kanan -->
-                  <p style="margin:0; font-size:0.95em; line-height:1.6; color:var(--text-primary);">${note.ai_translation || 'Tidak ada terjemahan.'}</p>
+                  <p style="margin:0; font-size:0.95em; line-height:1.6; color:var(--text-primary);">${note.ai_translation || 'No translation available.'}</p>
                 </div>
               </details>
               
               <!-- Menggunakan dropdown persis seperti yang di atasnya -->
               <details class="snc-details">
-                <summary>✨ Detail Selengkapnya <span class="snc-arrow">▼</span></summary>
+                <summary>✨ More Details <span class="snc-arrow">▼</span></summary>
                 <div class="snc-details-body" style="padding: 12px 16px; box-sizing: border-box; word-wrap: break-word; width: 100%; background: transparent;">
                   ${moreDetailsHtml}
                 </div>
@@ -330,9 +330,9 @@ async function loadSidebarNotes(pageNum) {
     } else {
       currentPageNotes = [];
       if (hlCount) hlCount.textContent = '0';
-      if (hlList) hlList.innerHTML = `<div class="hl-empty" style="text-align:center; padding:2rem 1rem; color:var(--text-muted);"><span style="font-size:2em;">📚</span><p>Belum ada catatan.</p></div>`;
+      if (hlList) hlList.innerHTML = `<div class="hl-empty" style="text-align:center; padding:2rem 1rem; color:var(--text-muted);"><span style="font-size:2em;">📚</span><p>No notes yet.</p></div>`;
     }
-  } catch (err) { console.error('Gagal memuat catatan', err); }
+  } catch (err) { console.error('Failed to load notes', err); }
 }
 window.loadHighlightsForPage = loadSidebarNotes;
 
@@ -351,7 +351,7 @@ async function playAudio(text, accent = 'american') {
         }, 
         body: JSON.stringify({ text: text, accent: accent }) 
     });
-    if (!response.ok) throw new Error('Gagal memuat suara');
+    if (!response.ok) throw new Error('Failed to load voice');
     const audioBlob = await response.blob();
     const audioUrl = URL.createObjectURL(audioBlob);
     currentAudio = new Audio(audioUrl);
@@ -359,7 +359,7 @@ async function playAudio(text, accent = 'american') {
     if (speedSelect) currentAudio.playbackRate = parseFloat(speedSelect.value);
     currentAudio.play();
   } catch (error) {
-    showToast('Gagal memuat suara. Periksa koneksi internet.', 'error');
+    showToast('Failed to load voice. Please check your internet connection.', 'error');
   }
 }
 
@@ -384,9 +384,9 @@ function bindDeleteNotes() {
     if (btn) {
       const noteId = btn.getAttribute('data-id');
       showConfirmModal(
-        'Hapus Catatan',
-        'Apakah Anda yakin ingin menghapus catatan dan stabilo ini? Tindakan ini tidak dapat dibatalkan.',
-        'Hapus',
+        'Delete Note',
+        'Are you sure you want to delete this note and highlight? This action cannot be undone.',
+        'Delete',
         async () => {
             btn.innerHTML = '⏳';
             try {
@@ -396,11 +396,11 @@ function bindDeleteNotes() {
                   headers: csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}
               });
               if (res.ok) { 
-                  showToast('Catatan berhasil dihapus.', 'success');
+                  showToast('Note deleted successfully.', 'success');
                   isRendering = false; renderPage(currentPage); 
-              } else throw new Error('Gagal');
+              } else throw new Error('Failed');
             } catch (err) { 
-                showToast('Gagal menghapus catatan.', 'error'); 
+                showToast('Failed to delete note.', 'error'); 
                 btn.innerHTML = '🗑️'; 
             }
         }
@@ -415,13 +415,13 @@ function bindDeleteAllNotes() {
     btnAll.addEventListener('click', () => {
         const deleteBtns = document.querySelectorAll('.delete-note-btn');
         if (deleteBtns.length === 0) {
-            showToast('Tidak ada catatan di dokumen ini untuk dihapus.', 'warning');
+            showToast('No notes in this document to delete.', 'warning');
             return;
         }
         showConfirmModal(
-            'Hapus SEMUA Catatan',
-            `Anda akan menghapus <b style="color:var(--text-primary);">${deleteBtns.length} catatan</b> beserta stabilo di dokumen ini secara permanen.<br><br>Apakah Anda sangat yakin?`,
-            'Ya, Hapus Semua',
+            'Delete ALL Notes',
+            `You are about to permanently delete <b style="color:var(--text-primary);">${deleteBtns.length} notes</b> and highlights in this document.<br><br>Are you absolutely sure?`,
+            'Yes, Delete All',
             async () => {
                 btnAll.innerHTML = '⏳'; btnAll.disabled = true;
                 try {
@@ -429,10 +429,10 @@ function bindDeleteAllNotes() {
                     const headers = csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {};
                     const ids = Array.from(deleteBtns).map(b => b.getAttribute('data-id'));
                     await Promise.all(ids.map(id => fetch(`/api/highlights/${id}`, { method: 'DELETE', headers })));
-                    showToast('Semua catatan berhasil dibersihkan.', 'success');
+                    showToast('All notes cleared successfully.', 'success');
                     isRendering = false; renderPage(currentPage);
                 } catch (err) {
-                    showToast('Beberapa catatan gagal dihapus.', 'error');
+                    showToast('Failed to delete some notes.', 'error');
                 } finally {
                     btnAll.innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>`;
                     btnAll.disabled = false;
@@ -671,7 +671,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (text.length > 0 && tooltip && !tooltip.contains(e.target) && aiPanel && !aiPanel.contains(e.target) && isInsidePdfArea) {
       const wordCount = text.split(/\s+/).filter(w => w.length > 0).length;
       if (wordCount > 7) {
-          showToast(`Terlalu panjang (${wordCount} kata). AI khusus untuk frasa pendek / vocab (Maks: 7 kata).`, 'warning');
+          showToast(`Too long (${wordCount} words). AI is intended for short phrases / vocabulary (Max: 7 words).`, 'warning');
           selection.removeAllRanges(); 
           tooltip.hidden = true; return;
       }
@@ -740,14 +740,14 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="ai-stack">
             <div class="ai-selected-text-box">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="font-size:0.85em; color:var(--text-muted); font-weight:600;">Teks Terpilih:</span>
+                <span style="font-size:0.85em; color:var(--text-muted); font-weight:600;">Selected Text:</span>
                 <div style="display:flex; align-items:center; gap:8px;">
                 <select id="tts-speed" style="font-size:0.8em; padding:2px 5px; border-radius:4px; border:1px solid var(--border); outline:none; background:var(--surface); color:var(--text-primary);">
-                    <option value="1.0">1.0x (Normal)</option><option value="0.8">0.8x (Lambat)</option><option value="0.5">0.5x (Sangat Lambat)</option>
+                    <option value="1.0">1.0x (Normal)</option><option value="0.8">0.8x (Slow)</option><option value="0.5">0.5x (Very Slow)</option>
                 </select>
                 <div style="display:flex; gap:4px;">
-                    <button id="play-selected-us-btn" class="play-audio-btn" title="Dengarkan (US)">🇺🇸</button>
-                    <button id="play-selected-uk-btn" class="play-audio-btn" title="Dengarkan (UK)">🇬🇧</button>
+                    <button id="play-selected-us-btn" class="play-audio-btn" title="Listen (US)">🇺🇸</button>
+                    <button id="play-selected-uk-btn" class="play-audio-btn" title="Listen (UK)">🇬🇧</button>
                 </div>
                 </div>
             </div>
@@ -758,16 +758,16 @@ document.addEventListener('DOMContentLoaded', () => {
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                 <h4 style="margin:0; color:var(--primary); font-size:1.1em;">🧠 English Explanation</h4>
                 <div style="display:flex; gap:4px;">
-                    <button id="play-exp-us-btn" class="play-audio-btn" title="Dengarkan Penjelasan (US)">🇺🇸</button>
-                    <button id="play-exp-uk-btn" class="play-audio-btn" title="Dengarkan Penjelasan (UK)">🇬🇧</button>
+                    <button id="play-exp-us-btn" class="play-audio-btn" title="Listen to Explanation (US)">🇺🇸</button>
+                    <button id="play-exp-uk-btn" class="play-audio-btn" title="Listen to Explanation (UK)">🇬🇧</button>
                 </div>
             </div>
             <p style="font-size:0.95em; line-height:1.6; color:var(--text-primary);">${data.explanation}</p>
             </div>
 
             <div id="unlock-gate" style="margin:0 0 12px 0; border:2px dashed var(--border,#dee2e6); border-radius:10px; padding:14px 16px; background:rgba(13,110,253,0.03); text-align:center;">
-            <p style="margin:0 0 10px 0; font-size:0.88em; color:var(--text-muted); line-height:1.4;">🔒 Baca dan pahami penjelasan di atas terlebih dahulu.</p>
-            <button id="unlock-btn" style="background:#0d6efd; color:#fff; border:none; border-radius:8px; padding:9px 22px; font-size:0.9em; font-weight:700; cursor:pointer;">✅ Saya Sudah Paham — Buka Terjemahan</button>
+            <p style="margin:0 0 10px 0; font-size:0.88em; color:var(--text-muted); line-height:1.4;">🔒 Please read and understand the explanation above first.</p>
+            <button id="unlock-btn" style="background:#0d6efd; color:#fff; border:none; border-radius:8px; padding:9px 22px; font-size:0.9em; font-weight:700; cursor:pointer;">✅ Reveal Translation & Details</button>
             </div>
 
             <div id="locked-section" style="pointer-events:none; opacity:0.35; filter:blur(2px); transition:all 0.4s ease;">
@@ -777,14 +777,14 @@ document.addEventListener('DOMContentLoaded', () => {
             </details>
             
             <details style="margin-bottom: 12px;">
-                <summary>✨ More details</summary>
+                <summary>✨ More Details</summary>
                 <div class="details-content" style="padding-top: 10px;">
                 ${dynamicCardsHtml}
                 </div>
             </details>
             </div>
 
-            <button id="save-ai-note-btn" class="save-note-btn"><span>📝</span> Simpan Catatan</button>
+            <button id="save-ai-note-btn" class="save-note-btn"><span>📝</span> Save Note</button>
         </div>
         `;
           
@@ -802,13 +802,13 @@ document.addEventListener('DOMContentLoaded', () => {
                   lockedSec.style.pointerEvents = 'auto'; 
                   lockedSec.style.opacity = '1'; 
                   lockedSec.style.filter = 'none'; 
-                  document.getElementById('unlock-gate').innerHTML = `<span style="font-size:0.82em; color:#198754; font-weight:600;">✅ Terbuka</span>`; 
+                  document.getElementById('unlock-gate').innerHTML = `<span style="font-size:0.82em; color:#198754; font-weight:600;">✅ Unlocked</span>`; 
               });
           }
 
 const saveNoteBtn = document.getElementById('save-ai-note-btn');
           if (saveNoteBtn) saveNoteBtn.addEventListener('click', async () => {
-            saveNoteBtn.innerHTML = '⏳ Menyimpan...'; saveNoteBtn.disabled = true;
+            saveNoteBtn.innerHTML = '⏳ Saving...'; saveNoteBtn.disabled = true;
             try {
               const csrfToken = getCsrfToken();
               const res = await fetch('/api/highlights/ai-note', {
@@ -837,8 +837,8 @@ const saveNoteBtn = document.getElementById('save-ai-note-btn');
               });
 
               if (res.ok) { 
-                  saveNoteBtn.innerHTML = '✅ Tersimpan'; 
-                  showToast('Catatan berhasil disimpan.', 'success');
+                  saveNoteBtn.innerHTML = '✅ Saved'; 
+                  showToast('Note saved successfully.', 'success');
                   const tempHl = document.querySelector('span.temp-highlight');
                   if(tempHl) {
                       tempHl.classList.remove('temp-highlight');
@@ -846,22 +846,22 @@ const saveNoteBtn = document.getElementById('save-ai-note-btn');
                   }
                   isRendering = false; await renderPage(currentPage); 
               } 
-              else throw new Error('Gagal');
+              else throw new Error('Failed');
             } catch (error) { 
-                saveNoteBtn.innerHTML = '❌ Gagal Menyimpan'; saveNoteBtn.disabled = false; 
-                showToast('Gagal menyimpan catatan.', 'error');
+                saveNoteBtn.innerHTML = '❌ Save Failed'; saveNoteBtn.disabled = false; 
+                showToast('Failed to save note.', 'error');
             }
           });
         } else { 
-            aiPanelBody.innerHTML = `<div style="text-align:center; padding:2rem 1rem;"><h4 style="color:var(--danger);">Gagal Menganalisis</h4></div>`; 
-            showToast('AI gagal memproses teks.', 'error');
+            aiPanelBody.innerHTML = `<div style="text-align:center; padding:2rem 1rem;"><h4 style="color:var(--danger);">Analysis Failed</h4></div>`; 
+            showToast('AI failed to process text.', 'error');
         }
       } catch (error) { 
         analyzeBtn.classList.remove('loading-magic');
         if (tooltip) tooltip.hidden = true;
         if(aiPanel) aiPanel.hidden = false;
-        if(aiPanelBody) aiPanelBody.innerHTML = `<div style="text-align:center; padding:2rem 1rem;"><h4 style="color:var(--danger);">Koneksi Gagal</h4></div>`; 
-        showToast('Koneksi internet terputus.', 'error');
+        if(aiPanelBody) aiPanelBody.innerHTML = `<div style="text-align:center; padding:2rem 1rem;"><h4 style="color:var(--danger);">Connection Failed</h4></div>`; 
+        showToast('Internet connection lost.', 'error');
       }
     });
   }
