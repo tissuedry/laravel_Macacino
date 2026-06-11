@@ -11,54 +11,46 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 
-/*
-|--------------------------------------------------------------------------
-| 1. RUTE HALAMAN UTAMA (VIEWS)
-|--------------------------------------------------------------------------
-*/
-
 Route::middleware('auth')->group(function () {
-    
-    // Halaman Dashboard / Library
+
+
     Route::get('/', function () {
         return view('index');
     })->name('dashboard');
 
-    // Halaman Pembaca PDF (Reader)
+
     Route::get('/reader/{id}', function ($id) {
         return view('reader', ['document_id' => $id]);
     });
 
-    // Halaman Notes & Vocabulary
+
     Route::get('/notes', function () {
-        // Mengambil semua catatan milik user yang sedang login, diurutkan dari yang terbaru
-        $highlights = Highlight::whereHas('document', function($q) {
+        $highlights = Highlight::whereHas('document', function ($q) {
             $q->where('user_id', Auth::id());
         })->with('document')->orderBy('created_at', 'desc')->get();
 
-        // Mengelompokkan catatan berdasarkan judul buku
-        $grouped_notes = $highlights->groupBy(function($item) {
+        $grouped_notes = $highlights->groupBy(function ($item) {
             return $item->document->title;
         });
 
         return view('notes', compact('grouped_notes'));
     });
 
-    // Halaman Statistik Belajar
+
     Route::get('/stats', function () {
         $userId = Auth::id();
         $docs = Document::where('user_id', $userId)->get();
-        
-        $total_words = Highlight::whereHas('document', function($q) use($userId) { 
-            $q->where('user_id', $userId); 
+
+        $total_words = Highlight::whereHas('document', function ($q) use ($userId) {
+            $q->where('user_id', $userId);
         })->count();
 
         $finished_books = $docs->where('last_page', '>=', 'total_pages')->where('total_pages', '>', 0)->count();
 
         // 1. Hitung Streak Belajar Asli (Consecutive Days dari Highlights / Read Activity)
-        $highlightDates = Highlight::whereHas('document', function($q) use($userId) {
-                $q->where('user_id', $userId);
-            })
+        $highlightDates = Highlight::whereHas('document', function ($q) use ($userId) {
+            $q->where('user_id', $userId);
+        })
             ->selectRaw('DATE(created_at) as date')
             ->pluck('date')
             ->map(fn($d) => \Carbon\Carbon::parse($d)->toDateString());
@@ -75,14 +67,14 @@ Route::middleware('auth')->group(function () {
         if ($allDates->isNotEmpty()) {
             $today = \Carbon\Carbon::today()->toDateString();
             $yesterday = \Carbon\Carbon::yesterday()->toDateString();
-            
+
             $currentDate = null;
             if ($allDates->contains($today)) {
                 $currentDate = \Carbon\Carbon::today();
             } elseif ($allDates->contains($yesterday)) {
                 $currentDate = \Carbon\Carbon::yesterday();
             }
-            
+
             if ($currentDate) {
                 while ($allDates->contains($currentDate->toDateString())) {
                     $streak_days++;
@@ -95,13 +87,13 @@ Route::middleware('auth')->group(function () {
         $books_with_notes = Document::where('user_id', $userId)
             ->withCount('highlights')
             ->get()
-            ->filter(function($doc) {
+            ->filter(function ($doc) {
                 return $doc->highlights_count > 0;
             })
             ->values();
 
         $doc_titles = json_encode($docs->pluck('title')->toArray());
-        $doc_progress = json_encode($docs->map(function($doc) {
+        $doc_progress = json_encode($docs->map(function ($doc) {
             return $doc->total_pages > 0 ? round(($doc->last_page / $doc->total_pages) * 100) : 0;
         })->toArray());
 
@@ -111,7 +103,7 @@ Route::middleware('auth')->group(function () {
         return view('stats', compact('streak_days', 'total_words', 'finished_books', 'doc_titles', 'doc_progress', 'vocab_titles', 'vocab_counts'));
     });
 
-    // Halaman Profil
+
     Route::get('/profile', function () {
         return view('profile');
     })->name('profile.edit');
@@ -119,17 +111,9 @@ Route::middleware('auth')->group(function () {
 });
 
 
-/*
-|--------------------------------------------------------------------------
-| 2. RUTE API INTERNAL (AJAX / FETCH DARI JAVASCRIPT FRONTEND)
-|--------------------------------------------------------------------------
-| Dibungkus dalam middleware 'auth' dan prefix 'api' agar JavaScript 
-| frontend bisa mengaksesnya dengan aman menggunakan CSRF Token.
-*/
-
 Route::middleware('auth')->prefix('api')->group(function () {
-    
-    // --- API Documents ---
+
+
     Route::get('/documents', [DocumentController::class, 'index']);
     Route::get('/documents/{id}', [DocumentController::class, 'show']);
     Route::post('/documents/upload', [DocumentController::class, 'upload']);
@@ -138,18 +122,18 @@ Route::middleware('auth')->prefix('api')->group(function () {
     Route::delete('/documents/{id}', [DocumentController::class, 'destroy']);
     Route::post('/documents/bulk-delete', [DocumentController::class, 'bulkDestroy']);
 
-    // --- API Highlights (Catatan AI) ---
+
     Route::get('/highlights/document/{id}', [HighlightController::class, 'getHighlights']);
     Route::post('/highlights', [HighlightController::class, 'createHighlight']);
     Route::post('/highlights/ai-note', [HighlightController::class, 'createAiNote']);
     Route::get('/highlights/{id}', [HighlightController::class, 'show']);
     Route::delete('/highlights/{id}', [HighlightController::class, 'destroy']);
 
-    // --- API Fitur AI (Groq & Text-to-Speech) ---
+
     Route::post('/ai/explain', [AIController::class, 'explainText']);
     Route::post('/ai/tts', [AIController::class, 'edgeTtsEndpoint']);
 
-    // --- API Update Password Profil ---
+
     Route::post('/profile/update', function (Request $request) {
         $request->validate([
             'new_password' => 'required|string|min:8',
@@ -164,9 +148,5 @@ Route::middleware('auth')->prefix('api')->group(function () {
 
 });
 
-/*
-|--------------------------------------------------------------------------
-| 3. RUTE AUTENTIKASI BAWAAN BREEZE
-|--------------------------------------------------------------------------
-*/
-require __DIR__.'/auth.php';
+
+require __DIR__ . '/auth.php';

@@ -1,11 +1,6 @@
-/* ============================================================
-   READFOLIO — app.js
-   Shared utilities: toast, API helpers, formatting
-   ============================================================ */
-
 'use strict';
 
-// ── Toast ─────────────────────────────────────────────────────
+// Toast 
 window.showToast = function (msg, type = 'default', duration = 3200) {
   const container = document.getElementById('toast-container');
   const toast = document.createElement('div');
@@ -18,7 +13,7 @@ window.showToast = function (msg, type = 'default', duration = 3200) {
   }, duration);
 };
 
-// ── API Helper ────────────────────────────────────────────────
+// API Helper
 window.api = {
   async get(url) {
     const res = await fetch(url);
@@ -50,7 +45,7 @@ window.api = {
   },
 };
 
-// ── Format Helpers ────────────────────────────────────────────
+// Format Helpers
 window.formatDate = function (isoString) {
   if (!isoString) return '—';
   return new Intl.DateTimeFormat('id-ID', {

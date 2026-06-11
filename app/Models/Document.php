@@ -22,7 +22,7 @@ class Document extends Model
         'last_read_at' => 'datetime',
     ];
 
-    // Otomatis men-generate file_url untuk mempermudah render PDF di JS
+
     protected $appends = ['file_url'];
 
     public function getFileUrlAttribute()

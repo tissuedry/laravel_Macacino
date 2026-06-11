@@ -26,7 +26,7 @@ class Highlight extends Model
         'ai_details'
     ];
 
-    // Array casting untuk memastikan ai_vocabulary terbaca sebagai JSON objek oleh database
+
     protected $casts = [
         'ai_vocabulary' => 'array',
     ];

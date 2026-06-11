@@ -29,7 +29,7 @@
       <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 16px;">
         @foreach ($notes as $note)
             @php
-                // Proses data JSON dari AI secara aman
+                
                 $details = [];
                 if (!empty($note->ai_details)) {
                     $details = is_string($note->ai_details) ? json_decode($note->ai_details, true) : $note->ai_details;
@@ -123,7 +123,7 @@
 </div>
 
 <style>
-    .note-accordion summary::-webkit-details-marker { display: none; } /* Sembunyikan default panah browser */
+    .note-accordion summary::-webkit-details-marker { display: none; }
     .note-accordion summary { list-style: none; }
     
     .note-accordion[open] .accordion-arrow {

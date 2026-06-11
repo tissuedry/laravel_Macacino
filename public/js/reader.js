@@ -1,7 +1,3 @@
-/* ============================================================
-   READFOLIO — reader.js 
-   ============================================================ */
-
 'use strict';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
@@ -45,26 +41,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   style.innerHTML = `mark::selection, span.temp-highlight::selection { background: transparent; }`;
   document.head.appendChild(style);
 
-// 🟢 LOGIKA TOGGLE SIDEBAR KIRI YANG BARU 🟢
   const toggleLeftSidebarBtn = document.getElementById('toggle-left-sidebar-btn');
   const highlightsSidebar = document.getElementById('highlights-sidebar');
   const leftResizer = document.getElementById('left-resizer'); 
 
   if (toggleLeftSidebarBtn && highlightsSidebar) {
       toggleLeftSidebarBtn.addEventListener('click', () => {
-          // Gunakan toggle class 'hidden' milik Tailwind (berisi display: none !important)
           highlightsSidebar.classList.toggle('hidden');
           
-          // Sembunyikan juga resizer-nya agar tidak ada ruang "hantu"
           if (leftResizer) {
               leftResizer.classList.toggle('hidden');
           }
       });
   }
-  // 🟢 SAMPAI SINI 🟢
 });
 
-// ── UTILITIES: Toast & Modal UI ────────────────────────────────
+// Toast & Modal UI
 function showToast(message, type = 'warning') {
     let container = document.getElementById('toast-container');
     if (!container) {
@@ -112,10 +104,8 @@ function showConfirmModal(title, message, confirmText, onConfirm) {
     });
 }
 
-// ── FUNGSI GENERATOR HTML MORE DETAILS ─────────────────────────
-// KODE FULL 1: Kembalikan fungsi generateMoreDetailsHtml
+// GENERATOR HTML MORE DETAILS
 function generateMoreDetailsHtml(grammar, collocations, idiomNote, tip, selectedText, nuance, tenseInfo) {
-    // Collocations
     let collocHtml = '';
     if (collocations && collocations.length > 0) {
         collocHtml = collocations.map(c =>
@@ -125,7 +115,6 @@ function generateMoreDetailsHtml(grammar, collocations, idiomNote, tip, selected
         collocHtml = '<span style="color:var(--text-muted); font-style:italic; font-size:0.9em;">Tidak ada kolokasi umum.</span>';
     }
 
-    // Nuance
     let nuanceHtml = '';
     if (nuance && nuance.trim()) {
         const nuanceLower = nuance.toLowerCase();
@@ -143,7 +132,6 @@ function generateMoreDetailsHtml(grammar, collocations, idiomNote, tip, selected
         nuanceHtml = '<span style="color:var(--text-muted); font-style:italic; font-size:0.9em;">Tidak ada nuansa khusus.</span>';
     }
 
-    // Tense Info
     let tenseHtml = '';
     if (tenseInfo && tenseInfo.trim()) {
         tenseHtml = `<div style="font-size:0.9em; color:var(--text-secondary); line-height:1.7; white-space:pre-line;">${tenseInfo}</div>`;
@@ -214,7 +202,7 @@ function bindHighlightClicks() {
               noteCard.classList.remove('flash-highlight');
               void noteCard.offsetWidth;
               noteCard.classList.add('flash-highlight');
-          }, 150);
+          }, 10);
         }
       }
     }
@@ -238,7 +226,6 @@ function applySavedHighlightsToText(notes) {
   htmlContainer.innerHTML = containerHtml;
 }
 
-// ── RENDER CATATAN DI SIDEBAR KIRI ─────────────────────────────
 async function loadSidebarNotes(pageNum) {
   try {
     const res  = await fetch(`/api/highlights/document/${DOCUMENT_ID}`);
@@ -257,12 +244,10 @@ async function loadSidebarNotes(pageNum) {
         const safeSelectedText = encodeURIComponent(note.text_content || '');
         const safeExplanation  = encodeURIComponent(note.ai_explanation || '');
 
-        // 1. Ekstrak data JSON dengan aman (mencegah double-stringified dari database)
         let detailsObj = {};
         if (note.ai_details) {
             try { 
                 let parsed = typeof note.ai_details === 'string' ? JSON.parse(note.ai_details) : note.ai_details; 
-                // Jaga-jaga jika ter-stringify dua kali oleh server
                 if (typeof parsed === 'string') parsed = JSON.parse(parsed);
                 detailsObj = parsed;
             } catch(e) {
@@ -270,15 +255,13 @@ async function loadSidebarNotes(pageNum) {
             }
         }
         
-        // 2. Siapkan masing-masing variabel sesuai nama kunci (key) di JSON
         const grammar = detailsObj.grammar || note.ai_grammar || null;
         const collocations = detailsObj.collocations || [];
         const idiomNote = detailsObj.idiom_note || note.ai_idiom_note || null;
         const tip = detailsObj.tip || null;
         const nuance = detailsObj.nuance || null;
-        const tenseInfo = detailsObj.tense_info || null; // JSON key-nya menggunakan underscore
+        const tenseInfo = detailsObj.tense_info || null;
 
-        // 3. Masukkan ke lubang cetakan dengan URUTAN YANG SAMA PERSIS dengan definisi fungsi Anda
         const moreDetailsHtml = generateMoreDetailsHtml(
             grammar, 
             collocations, 
@@ -363,7 +346,7 @@ async function playAudio(text, accent = 'american') {
         method: 'POST', 
         headers: { 
             'Content-Type': 'application/json', 
-            'Accept': 'application/json', // Tambahkan ini
+            'Accept': 'application/json',
             'X-CSRF-TOKEN': csrfToken || '' 
         }, 
         body: JSON.stringify({ text: text, accent: accent }) 
@@ -487,7 +470,6 @@ async function loadDocument() {
 let pageNumPending = null;
 
 async function renderPage(pageNum) {
-  // Jika sistem sedang sibuk me-render, jangan abaikan klik, tapi antrekan halamannya
   if (isRendering) {
     pageNumPending = pageNum; 
     return;
@@ -500,7 +482,6 @@ async function renderPage(pageNum) {
   if(prevBtn) prevBtn.disabled = false;
   if(nextBtn) nextBtn.disabled = false;
 
-  // Memunculkan efek loading (opsional, sesuaikan dengan id loading di HTML Anda)
   if(pdfLoading) pdfLoading.style.display = 'flex'; 
   if(centerWrapper) centerWrapper.hidden = true; 
 
@@ -531,19 +512,15 @@ async function renderPage(pageNum) {
 if(pdfLoading) pdfLoading.style.display = 'none';
     if(centerWrapper) centerWrapper.hidden = false; 
     
-    // --- METODE SAPU BERSIH: RESET SEMUA KEMUNGKINAN SCROLLBAR KE ATAS ---
     const pdfAreaEl = document.getElementById('pdf-area');
     if(pdfAreaEl) pdfAreaEl.scrollTop = 0;
     if(htmlContainer) htmlContainer.scrollTop = 0;
     if(centerWrapper) centerWrapper.scrollTop = 0;
     
-    // Reset jika scrollbar menempel pada window/body global browser
     window.scrollTo(0, 0);
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
-    // ---------------------------------------------------------------------
 
-    // Load sidebar tanpa "await" agar tidak mengunci tombol
     loadSidebarNotes(pageNum);
     
     if (document.body.classList.contains('focus-mode-active')) updateFocusModeText();
@@ -559,10 +536,8 @@ if(pdfLoading) pdfLoading.style.display = 'none';
     console.error('Render error:', err); 
     if(pdfLoading) pdfLoading.style.display = 'none';
   } finally { 
-    // 3. BUKA KUNCI DAN CEK ANTREAN
     isRendering = false; 
     
-    // Jika ada halaman yang mengantre saat proses tadi berlangsung, langsung eksekusi!
     if (pageNumPending !== null) {
       const renderNext = pageNumPending;
       pageNumPending = null; 
@@ -678,7 +653,6 @@ function applyHighlightMarker() {
   catch (e) { console.warn('Highlight melintasi paragraf, dibatalkan.'); }
 }
 
-// ── RENDER ANALISIS BARU DI SIDEBAR KANAN ──────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   const tooltip      = document.getElementById('selection-tooltip');
   const analyzeBtn   = document.getElementById('analyze-btn');
@@ -693,7 +667,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (analyzeBtn && analyzeBtn.classList.contains('loading-magic')) return;
     const selection = window.getSelection();
     const text = selection.toString().trim();
-    if (text.length > 0 && tooltip && !tooltip.contains(e.target) && aiPanel && !aiPanel.contains(e.target)) {
+    const isInsidePdfArea = e.target.closest('#pdf-area');
+    if (text.length > 0 && tooltip && !tooltip.contains(e.target) && aiPanel && !aiPanel.contains(e.target) && isInsidePdfArea) {
       const wordCount = text.split(/\s+/).filter(w => w.length > 0).length;
       if (wordCount > 7) {
           showToast(`Terlalu panjang (${wordCount} kata). AI khusus untuk frasa pendek / vocab (Maks: 7 kata).`, 'warning');
@@ -703,11 +678,9 @@ document.addEventListener('DOMContentLoaded', () => {
       selectedText = text;
       let rawContext = (selection.anchorNode && selection.anchorNode.parentNode) ? selection.anchorNode.parentNode.textContent.trim() : text;
       
-      // Jika teks context lebih dari 1500 karakter, kita potong secara cerdas
       if (rawContext.length > 1500) {
           let matchIndex = rawContext.indexOf(selectedText);
           if (matchIndex !== -1) {
-              // Ambil 500 karakter sebelum dan 500 karakter sesudah kata yang dipilih agar AI tetap paham konteksnya
               let start = Math.max(0, matchIndex - 500);
               let end = Math.min(rawContext.length, matchIndex + selectedText.length + 500);
               contextText = rawContext.substring(start, end) + "...";
@@ -747,7 +720,7 @@ document.addEventListener('DOMContentLoaded', () => {
             method: 'POST', 
             headers: { 
                 'Content-Type': 'application/json', 
-                'Accept': 'application/json', // Tambahkan ini
+                'Accept': 'application/json',
                 'X-CSRF-TOKEN': csrfToken || '' 
             }, 
             body: JSON.stringify({ text: selectedText, context: contextText }) 
@@ -761,7 +734,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (response.ok && result.data) {
           const data = result.data;
           
-          // KODE FULL 2: Kembalikan tampilan Panel AI Kanan
         const dynamicCardsHtml = generateMoreDetailsHtml(data.grammar, data.collocations, data.idiom_note, data.tip, selectedText, data.nuance, data.tense_info);
                 
         let htmlContent = `
@@ -823,7 +795,6 @@ document.addEventListener('DOMContentLoaded', () => {
           document.getElementById('play-exp-us-btn')?.addEventListener('click', () => playAudio(data.explanation, 'american'));
           document.getElementById('play-exp-uk-btn')?.addEventListener('click', () => playAudio(data.explanation, 'british'));
 
-          // Logika Buka Kunci (Unlock Gate)
           const unlockBtn = document.getElementById('unlock-btn'); 
           const lockedSec = document.getElementById('locked-section');
           if (unlockBtn && lockedSec) {
@@ -835,8 +806,6 @@ document.addEventListener('DOMContentLoaded', () => {
               });
           }
 
-       
-
 const saveNoteBtn = document.getElementById('save-ai-note-btn');
           if (saveNoteBtn) saveNoteBtn.addEventListener('click', async () => {
             saveNoteBtn.innerHTML = '⏳ Menyimpan...'; saveNoteBtn.disabled = true;
@@ -846,7 +815,7 @@ const saveNoteBtn = document.getElementById('save-ai-note-btn');
                 method: 'POST', 
                 headers: { 
                     'Content-Type': 'application/json', 
-                    'Accept': 'application/json', // Tambahkan ini
+                    'Accept': 'application/json', 
                     'X-CSRF-TOKEN': csrfToken || '' 
                 },
                 body: JSON.stringify({ 
@@ -865,7 +834,7 @@ const saveNoteBtn = document.getElementById('save-ai-note-btn');
                         tense_info: data.tense_info 
                     })
                 })
-              }); // <-- FIX: Properly closed JSON.stringify and fetch
+              });
 
               if (res.ok) { 
                   saveNoteBtn.innerHTML = '✅ Tersimpan'; 
@@ -975,7 +944,6 @@ function initResizableSidebars() {
             startWidth = targetElement.offsetWidth;
             resizer.classList.add('dragging');
             
-            // 🌟 TAMBAHAN: Tandai body bahwa penyeretan sedang aktif
             document.body.classList.add('is-dragging'); 
             
             document.addEventListener('mousemove', doDrag);
@@ -984,14 +952,12 @@ function initResizableSidebars() {
         });
 
         function doDrag(e) {
-            // 🌟 TAMBAHAN: Hitung batas sisa layar agar tidak menabrak pada resolusi kecil
             const maxAvailableWidth = window.innerWidth - 100; 
 
             if (isCenter) {
                 let diff = e.clientX - startX;
                 let newWidth = isLeftEdge ? startWidth - (diff * 2) : startWidth + (diff * 2);
                 
-                // Batasi lebar kertas dinamis (Min: 400px, Max: 1200px / sisa layar)
                 let maxW = Math.min(1200, maxAvailableWidth);
                 if (newWidth >= 400 && newWidth <= maxW) { 
                     targetElement.style.width = `${newWidth}px`; 
@@ -999,7 +965,6 @@ function initResizableSidebars() {
             } else {
                 let newWidth = isLeftEdge ? startWidth + (e.clientX - startX) : startWidth - (e.clientX - startX);
                 
-                // Batasi lebar sidebar agar tidak memakan lebih dari 40% ruang monitor
                 let maxSidebarW = Math.min(500, window.innerWidth * 0.4);
                 if (newWidth > 200 && newWidth < maxSidebarW) { 
                     targetElement.style.width = `${newWidth}px`; 
@@ -1010,7 +975,6 @@ function initResizableSidebars() {
         function stopDrag() {
             resizer.classList.remove('dragging');
             
-            // 🌟 TAMBAHAN: Hapus penanda penyeretan dari body
             document.body.classList.remove('is-dragging'); 
             
             document.removeEventListener('mousemove', doDrag);
@@ -1026,5 +990,5 @@ function initResizableSidebars() {
 }
 
 function bindSidebarDetailsToggle() {
-    // placeholder — accordion sudah berjalan via native <details> HTML element
+    
 }
