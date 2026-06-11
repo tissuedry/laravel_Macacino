@@ -25,7 +25,6 @@
             border-radius: 4px;
         }
 
-<<<<<<< HEAD
   #html-text-container.hide-highlights mark,
   #html-text-container.hide-highlights span.temp-highlight {
     background-color: transparent !important;
@@ -75,8 +74,6 @@
   body.focus-mode-active .ai-panel-close { color: var(--text-muted); }
   body.focus-mode-active .ai-panel-close:hover { background: var(--bg-hover); color: var(--text-primary); }
   body.focus-mode-active .ai-panel-header { border-bottom-color: var(--border); }
-</style>
-=======
         .sidebar-note-card {
             border-radius: 8px;
             margin-bottom: 12px;
@@ -441,7 +438,6 @@
             visibility: visible;
         }
     </style>
->>>>>>> 2f96b4ef5f46a05ff515c43e4116cdfafc391c23
 @endsection
 
 @section('body')
@@ -549,85 +545,36 @@
                 <span class="spark s5"></span>
             </button>
         </div>
+
+        <!-- Focus Overlay -->
+        <div id="focus-overlay" class="bg-midnight">
+            <div class="focus-controls">
+                <div class="focus-page-info">Page <span id="focus-current-page">1</span> of <span id="focus-total-pages">-</span></div>
+                <button id="close-focus-btn" title="Exit Focus Mode (Esc)">
+                    <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <div class="breathing-background"></div>
+            
+            <div id="focus-text-container">
+                <div id="focus-text-content"></div>
+            </div>
+
+            <div class="focus-theme-selector">
+                <button class="focus-theme-btn active" data-theme="bg-paper" title="Kertas Putih" style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.1);"></button>
+                <button class="focus-theme-btn" data-theme="bg-buram" title="Kertas Buram" style="background: #F5F5F4;"></button>
+                <button class="focus-theme-btn" data-theme="bg-sepia" title="Warm Sepia" style="background: #F4ECD8;"></button>
+                <button class="focus-theme-btn" data-theme="bg-solar-light" title="Solarized Light" style="background: #FDF6E3;"></button>
+                
+                <button class="focus-theme-btn" data-theme="bg-nord" title="Nordic Blue" style="background: #2E3440;"></button>
+                <button class="focus-theme-btn" data-theme="bg-gruvbox" title="Gruvbox Dark" style="background: #282828;"></button>
+                <button class="focus-theme-btn" data-theme="bg-midnight" title="Midnight Abyss" style="background: #0F172A;"></button>
+                <button class="focus-theme-btn" data-theme="bg-dracula" title="Dracula" style="background: #282A36;"></button>
+                <button class="focus-theme-btn" data-theme="bg-zen" title="Zen Dark" style="background: #121212; border: 1px solid rgba(255,255,255,0.1);"></button>
+            </div>
+        </div>
     </div>
-<<<<<<< HEAD
-    
-    <div class="topbar-right">
-      <button class="icon-btn" id="toggle-highlights-btn" title="Sembunyikan Stabilo"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
-      <button class="icon-btn" id="start-focus-btn" title="Mode Fokus"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg></button>
-      <button class="icon-btn" id="highlights-toggle-btn" title="Catatan AI"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>
-    </div>
-  </header>
-
-  <div class="reader-body">
-    <aside class="highlights-sidebar" id="highlights-sidebar">
-      <div class="hl-sidebar-header">
-        <h3 class="hl-sidebar-title">Reading Notes</h3>
-        <button id="delete-all-notes-btn" class="icon-btn" style="color: var(--danger);"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg></button>
-      </div>
-      <div class="hl-list" id="hl-list"></div>
-      <div class="resizer right-edge" id="left-resizer"></div>
-    </aside>
-
-    <div class="pdf-area" id="pdf-area">
-      <div class="pdf-loading" id="pdf-loading"><div class="loading-dot-wrap"><span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span></div></div>
-
-      <div class="center-reader-wrapper" id="center-reader-wrapper" hidden>
-        <div class="resizer left-edge" id="center-resizer-left"></div>
-        <div id="html-text-container" class="clean-text-reader"></div>
-        <div class="resizer right-edge" id="center-resizer-right"></div>
-      </div>
-    </div>
-
-    <aside class="ai-panel" id="ai-panel" hidden>
-      <div class="resizer left-edge" id="right-resizer"></div>
-      <div class="ai-panel-header">
-        <h3 class="ai-panel-title">🤖 AI Analysis</h3>
-        <button class="ai-panel-close" id="ai-panel-close"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-      </div>
-      <div class="ai-panel-body" id="ai-panel-body"></div>
-    </aside>
-  </div>
-
-  <div class="selection-tooltip" id="selection-tooltip" hidden>
-    <button class="tooltip-btn" id="analyze-btn" title="Analyze & Translate with AI">
-      <span class="emoji">✨</span>
-      <span class="spark s1"></span>
-      <span class="spark s2"></span>
-      <span class="spark s3"></span>
-      <span class="spark s4"></span>
-      <span class="spark s5"></span>
-    </button>
-  </div>
-
-  <div id="focus-overlay" class="bg-midnight">
-    <div class="focus-controls">
-      <div class="focus-page-info">Page <span id="focus-current-page">1</span> of <span id="focus-total-pages">-</span></div>
-      <button id="close-focus-btn" title="Exit Focus Mode (Esc)">
-        <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-      </button>
-    </div>
-
-    <div class="breathing-background"></div>
-    
-    <div id="focus-text-container">
-      <div id="focus-text-content"></div>
-    </div>
-
-    <div class="focus-theme-selector">
-      <button class="focus-theme-btn active" data-theme="bg-paper" title="Kertas Putih" style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.1);"></button>
-      <button class="focus-theme-btn" data-theme="bg-buram" title="Kertas Buram" style="background: #F5F5F4;"></button>
-      <button class="focus-theme-btn" data-theme="bg-sepia" title="Warm Sepia" style="background: #F4ECD8;"></button>
-      <button class="focus-theme-btn" data-theme="bg-solar-light" title="Solarized Light" style="background: #FDF6E3;"></button>
-      
-      <button class="focus-theme-btn" data-theme="bg-nord" title="Nordic Blue" style="background: #2E3440;"></button>
-      <button class="focus-theme-btn" data-theme="bg-gruvbox" title="Gruvbox Dark" style="background: #282828;"></button>
-      <button class="focus-theme-btn" data-theme="bg-midnight" title="Midnight Abyss" style="background: #0F172A;"></button>
-      <button class="focus-theme-btn" data-theme="bg-dracula" title="Dracula" style="background: #282A36;"></button>
-      <button class="focus-theme-btn" data-theme="bg-zen" title="Zen Dark" style="background: #121212; border: 1px solid rgba(255,255,255,0.1);"></button>
-    </div>
-  </div>
-</div>
 @endsection
 
 @section('scripts')
@@ -638,13 +585,4 @@
   window.DOCUMENT_ID = "{{ $document_id }}";
 </script>
 <script src="{{ asset('js/reader.js') }}"></script>
-=======
-@endsection
-
-@section('scripts')
-    <script>
-        window.DOCUMENT_ID = "{{ $document_id }}";
-    </script>
-    <script src="{{ asset('js/reader.js') }}"></script>
->>>>>>> 2f96b4ef5f46a05ff515c43e4116cdfafc391c23
 @endsection
