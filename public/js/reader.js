@@ -654,12 +654,13 @@ function applyHighlightMarker() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  const tooltip      = document.getElementById('selection-tooltip');
-  const analyzeBtn   = document.getElementById('analyze-btn');
-  const aiPanel      = document.getElementById('ai-panel');
-  const aiPanelClose = document.getElementById('ai-panel-close');
-  const aiPanelBody  = document.getElementById('ai-panel-body');
-  const pdfArea      = document.getElementById('pdf-area');
+  const tooltip            = document.getElementById('selection-tooltip');
+  const analyzeBtn         = document.getElementById('analyze-btn');
+  const aiPanel            = document.getElementById('ai-panel');
+  const aiPanelClose       = document.getElementById('ai-panel-close');
+  const aiPanelBody        = document.getElementById('ai-panel-body');
+  const pdfArea            = document.getElementById('pdf-area');
+  const focusTextContainer = document.getElementById('focus-text-container');
 
   let selectedText = ''; let contextText  = '';
 
@@ -667,8 +668,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (analyzeBtn && analyzeBtn.classList.contains('loading-magic')) return;
     const selection = window.getSelection();
     const text = selection.toString().trim();
-    const isInsidePdfArea = e.target.closest('#pdf-area');
-    if (text.length > 0 && tooltip && !tooltip.contains(e.target) && aiPanel && !aiPanel.contains(e.target) && isInsidePdfArea) {
+    const isInsideSelectableArea = e.target.closest('#pdf-area') || e.target.closest('#focus-text-container');
+    if (text.length > 0 && tooltip && !tooltip.contains(e.target) && aiPanel && !aiPanel.contains(e.target) && isInsideSelectableArea) {
       const wordCount = text.split(/\s+/).filter(w => w.length > 0).length;
       if (wordCount > 7) {
           showToast(`Too long (${wordCount} words). AI is intended for short phrases / vocabulary (Max: 7 words).`, 'warning');
@@ -699,6 +700,10 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   if (pdfArea && tooltip) pdfArea.addEventListener('scroll', () => { 
+    if (analyzeBtn && !analyzeBtn.classList.contains('loading-magic')) tooltip.hidden = true; 
+  });
+
+  if (focusTextContainer && tooltip) focusTextContainer.addEventListener('scroll', () => { 
     if (analyzeBtn && !analyzeBtn.classList.contains('loading-magic')) tooltip.hidden = true; 
   });
   

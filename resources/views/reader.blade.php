@@ -68,7 +68,7 @@
   .focus-theme-btn:hover { transform: scale(1.4); opacity: 1; }
   .focus-theme-btn.active { border-color: rgba(255, 255, 255, 0.8); transform: scale(1.2); box-shadow: 0 0 10px rgba(255, 255, 255, 0.15); opacity: 1; }
 
-  body.focus-mode-active { --bg-panel: #0f172a !important; --bg-secondary: #1e293b !important; --bg-hover: #334155 !important; --border: #1e293b !important; --text-primary: #f1f5f9 !important; --text-secondary: #cbd5e1 !important; --text-muted: #94a3b8 !important; --primary: #38bdf8 !important; --success: #34d399 !important; --surface: #1e293b !important; }
+  body.focus-mode-active { --bg-panel: #0f172a !important; --bg-secondary: #1e293b !important; --bg-hover: #334155 !important; --bg-warm: #1e293b !important; --border: #1e293b !important; --text-primary: #f1f5f9 !important; --text-secondary: #cbd5e1 !important; --text-muted: #94a3b8 !important; --primary: #38bdf8 !important; --success: #34d399 !important; --surface: #1e293b !important; }
   body.focus-mode-active #ai-panel { position: fixed; top: 0; right: 0; height: 100vh; z-index: 10000; box-shadow: -10px 0 30px rgba(0,0,0,0.6); background-color: var(--bg-panel); }
   body.focus-mode-active .ai-panel-title { color: var(--text-primary); }
   body.focus-mode-active .ai-panel-close { color: var(--text-muted); }

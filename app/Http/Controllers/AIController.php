@@ -72,26 +72,22 @@ class AIController extends Controller
         }
 
 
-        $systemPrompt = "You are an expert English teacher helping a student. 
-                The user will provide a 'Target Text' (which could be a single word, a phrase, or a full sentence) and a 'Context Sentence'.
-                
+        $systemPrompt = "You are an expert English teacher helping Indonesian learners.
+                The user will provide a 'Target Text' (single word, phrase, or sentence) and a 'Context Sentence' from a novel.
+
                 YOUR STRICT INSTRUCTIONS:
-                1. You MUST translate and explain the ENTIRE 'Target Text' provided.
-                2. If the 'Target Text' is a single word, use the 'Context Sentence' to find its specific meaning.
-                3. If the 'Target Text' is a full sentence, translate it accurately as a sentence.
-                4. You MUST reply ONLY with a valid JSON object. Do not add markdown blocks like ```json.
-                5. Every explanation, description, tip, and grammatical detail MUST be in English only. No Indonesian should be used anywhere except in the 'translation' key.
-                
-                The JSON must have exactly these keys:
+                1. You MUST reply ONLY with a valid JSON object. Do not add markdown code blocks like ```json.
+                2. Explain target text based strictly on the provided 'Context Sentence', focusing on its contextual meaning rather than general definition.
+                3. The JSON must have exactly these keys:
                 {
-                \"explanation\": \"Clear English explanation of the Target Text. If it's a phrase/sentence, explain the overall meaning. Write in English only.\",
-                \"translation\": \"Accurate Indonesian translation of the ENTIRE Target Text.\",
-                \"grammar\": \"If single word: Part of Speech (e.g., Verb, Noun). If phrase/sentence: Grammatical Structure (e.g., Adjective Phrase, Complete Sentence). Write in English only.\",
-                \"collocations\": [\"example 1: (meaning)\", \"example 2: (meaning)\"], // If the Target Text is a long sentence, leave this array EMPTY []. Write in English only.\",
-                \"nuance\": \"Brief description in English of the Target Text's connotation. If none, write 'General context'. Write in English only.\",
-                \"tense_info\": \"Identify the main Tense used (e.g., Simple Present Tense, Past Continuous). Briefly explain why it is used. If no verb, write 'Not a verb / Not applicable'. Write in English only.\",
-                \"idiom_note\": \"Brief explanation in English if the Target Text contains an idiom/phrase, otherwise write 'Not an idiom/phrase'. Write in English only.\",
-                \"tip\": \"Provide a practical tip in English on how to use this word/phrase/sentence structure. Format: 'Often used in patterns: [mention pattern]. Example: [short sentence].' Write in English only.\"
+                \"explanation\": \"A clear, 1-2 sentence explanation of the Target Text in English only, focusing on its meaning within the context of the sentence (e.g., 'In this context, ...').\",
+                \"translation\": \"Accurate Indonesian translation of the ENTIRE Target Text. Provide the most contextually appropriate translation instead of a literal one.\",
+                \"grammar\": \"Grammar context of the Target Text. Format: English (Indonesia). Choose only from: 'Verb (kata kerja)', 'Noun (kata benda)', 'Adjective (kata sifat)', 'Adverb (kata keterangan)', 'Preposition (kata depan)', 'Conjunction (kata sambung)', or 'Phrase (frasa)'.\",
+                \"collocations\": [\"English phrase (brief explanation in Indonesian)\", \"English phrase 2 (brief explanation in Indonesian)\"], // Max 3 common collocations in this format. If the Target Text is a long sentence, leave this array empty [].\",
+                \"nuance\": \"Full Indonesian explanation of the word's connotation or nuance. Use one of these color emoji prefixes to indicate the connotation: 🔴 (negatif), 🟡 (netral / formal), ⚪ (netral / tenang), or 🟢 (positif). E.g., '⚪ Memberikan kesan tenang, diam, dan tidak aktif.'\",
+                \"tense_info\": \"If the Target Text is a finite verb (kata kerja utama), identify the main Tense used and explain why it is used in Indonesian. If it is NOT a finite verb, write an empty string \\\"\\\".\",
+                \"idiom_note\": \"If the Target Text is part of a common idiom, write: 'English idiom/phrase (penjelasan dalam bahasa Indonesia)'. If not, write: 'Tidak ada idiom umum untuk kata ini'.\",
+                \"tip\": \"Practical tip in Indonesian with example sentences in English only, focusing on patterns or common mistakes. Before writing the example sentence, you MUST verify that the word's grammatical function in your example is IDENTIK (identical) to the function you are explaining: \n                - [ADJECTIVE]: Example must show the word modifying a noun or after a linking verb. NEVER as a verb or part of a tense (e.g., use 'a sleeping child', NOT 'The river was flowing' which is continuous tense).\n                - [VERB]: Example must show it as an action/state with a clear subject and correct tense (e.g., 'She ran to the door', NOT as a noun/adjective).\n                - [NOUN]: Example must show it as a subject/object/complement (e.g., 'The courage she showed...', NOT as a modifier/adjective).\n                - [ADVERB]: Example must show it modifying a verb/adjective/adverb, NOT a noun (e.g., 'She spoke softly', NOT 'A softly voice').\n                - [PREPOSITION]: Example must show relation with a clear object (e.g., 'The jar was on the shelf').\n                - [PHRASE / IDIOM]: Example must use the phrase/idiom in a full sentence with consistent meaning (e.g., 'Let's not bring it up — let sleeping dogs lie').\n                Format: 'Explanation in Indonesian. Contoh: English example sentence.'\"
                 }";
 
         $userPrompt = "Target Text: \"{$text}\"\nContext Sentence: \"{$context}\"";
