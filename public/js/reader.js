@@ -228,7 +228,7 @@ function applySavedHighlightsToText(notes) {
 
 async function loadSidebarNotes(pageNum) {
   try {
-    const res  = await fetch(`/api/highlights/document/${DOCUMENT_ID}`);
+    const res  = await fetch(`/web-api/highlights/document/${DOCUMENT_ID}`);
     const json = await res.json();
     const hlList  = document.getElementById('hl-list');
     const hlCount = document.getElementById('hl-count');
@@ -342,7 +342,7 @@ async function playAudio(text, accent = 'american') {
   if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); }
   try {
     const csrfToken = getCsrfToken();
-    const response = await fetch('/api/ai/tts', { 
+    const response = await fetch('/web-api/ai/tts', { 
         method: 'POST', 
         headers: { 
             'Content-Type': 'application/json', 
@@ -391,7 +391,7 @@ function bindDeleteNotes() {
             btn.innerHTML = '⏳';
             try {
               const csrfToken = getCsrfToken();
-              const res = await fetch(`/api/highlights/${noteId}`, { 
+              const res = await fetch(`/web-api/highlights/${noteId}`, { 
                   method: 'DELETE',
                   headers: csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}
               });
@@ -428,7 +428,7 @@ function bindDeleteAllNotes() {
                     const csrfToken = getCsrfToken();
                     const headers = csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {};
                     const ids = Array.from(deleteBtns).map(b => b.getAttribute('data-id'));
-                    await Promise.all(ids.map(id => fetch(`/api/highlights/${id}`, { method: 'DELETE', headers })));
+                    await Promise.all(ids.map(id => fetch(`/web-api/highlights/${id}`, { method: 'DELETE', headers })));
                     showToast('All notes cleared successfully.', 'success');
                     isRendering = false; renderPage(currentPage);
                 } catch (err) {
@@ -444,7 +444,7 @@ function bindDeleteAllNotes() {
 
 async function loadDocument() {
   try {
-    const res = await fetch('/api/documents/' + DOCUMENT_ID);
+    const res = await fetch('/web-api/documents/' + DOCUMENT_ID);
     const jsonRes = await res.json();
     docData = jsonRes.data || jsonRes;
     if(docTitleEl) docTitleEl.textContent = docData.title;
@@ -455,7 +455,7 @@ async function loadDocument() {
 
     if (!docData.total_pages || docData.total_pages !== totalPages) {
       const csrfToken = getCsrfToken();
-      fetch('/api/documents/' + DOCUMENT_ID + '/total-pages', { 
+      fetch('/web-api/documents/' + DOCUMENT_ID + '/total-pages', { 
           method: 'PUT', 
           headers: csrfToken ? { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken } : { 'Content-Type': 'application/json' }, 
           body: JSON.stringify({ total_pages: totalPages }) 
@@ -526,7 +526,7 @@ if(pdfLoading) pdfLoading.style.display = 'none';
     if (document.body.classList.contains('focus-mode-active')) updateFocusModeText();
 
     const csrfToken = getCsrfToken();
-    fetch(`/api/documents/${DOCUMENT_ID}/last-page`, { 
+    fetch(`/web-api/documents/${DOCUMENT_ID}/last-page`, { 
         method: 'PUT', 
         headers: csrfToken ? { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken } : { 'Content-Type': 'application/json' }, 
         body: JSON.stringify({ page: pageNum }) 
@@ -721,7 +721,7 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log("Teks yang dikirim:", selectedText);
       try {
         const csrfToken = getCsrfToken();
-        const response = await fetch('/api/ai/explain', { 
+        const response = await fetch('/web-api/ai/explain', { 
             method: 'POST', 
             headers: { 
                 'Content-Type': 'application/json', 
@@ -816,7 +816,7 @@ const saveNoteBtn = document.getElementById('save-ai-note-btn');
             saveNoteBtn.innerHTML = '⏳ Saving...'; saveNoteBtn.disabled = true;
             try {
               const csrfToken = getCsrfToken();
-              const res = await fetch('/api/highlights/ai-note', {
+              const res = await fetch('/web-api/highlights/ai-note', {
                 method: 'POST', 
                 headers: { 
                     'Content-Type': 'application/json', 
