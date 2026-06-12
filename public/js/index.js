@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Load Documents 
 async function loadDocuments() {
   try {
-    const res = await api.get('/api/documents/');
+    const res = await api.get('/web-api/documents/');
     allDocuments = res.data || [];
     
     const urlParams = new URLSearchParams(window.location.search);
@@ -223,7 +223,7 @@ async function doUpload() {
 
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
     
-    const res = await fetch('/api/documents/upload', { 
+    const res = await fetch('/web-api/documents/upload', { 
         method: 'POST', 
         headers: csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {},
         body: formData 
@@ -278,7 +278,7 @@ function bindDeleteDocument() {
     
     try {
       const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-      const res = await fetch(`/api/documents/${docId}`, {
+      const res = await fetch(`/web-api/documents/${docId}`, {
           method: 'DELETE',
           headers: csrfToken ? { 'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' }
       });

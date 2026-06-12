@@ -75,7 +75,7 @@
 
     try {
       const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-      const res = await fetch('/api/profile/update', {
+      const res = await fetch('/web-api/profile/update', {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',

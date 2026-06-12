@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -10,28 +11,28 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
 
-    use HasFactory, Notifiable;
+  use HasApiTokens, HasFactory, Notifiable;
 
-    protected $table = 'users';
+  protected $table = 'users';
 
-    protected $fillable = [
-        'username',
-        'email',
-        'password',
-    ];
+  protected $fillable = [
+    'username',
+    'email',
+    'password',
+  ];
 
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+  protected $hidden = [
+    'password',
+    'remember_token',
+  ];
 
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-    ];
+  protected $casts = [
+    'email_verified_at' => 'datetime',
+    'password' => 'hashed',
+  ];
 
-    public function documents()
-    {
-        return $this->hasMany(Document::class, 'user_id');
-    }
+  public function documents()
+  {
+    return $this->hasMany(Document::class, 'user_id');
+  }
 }

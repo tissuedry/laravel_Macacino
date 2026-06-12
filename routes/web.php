@@ -111,7 +111,7 @@ Route::middleware('auth')->group(function () {
 });
 
 
-Route::middleware('auth')->prefix('api')->group(function () {
+Route::middleware('auth')->prefix('web-api')->group(function () {
 
 
     Route::get('/documents', [DocumentController::class, 'index']);
